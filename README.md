@@ -1,48 +1,57 @@
-# 🚀 Windows Optimization Toolkit - GUI Remota
+# 🐺 LOBO ALPHA V2.0 — PREMIUM EDITION
 
-Otimize seu Windows com uma interface gráfica profissional, baixando e executando scripts diretamente do GitHub!
+**Toolkit profissional de otimização Windows** com interface gráfica moderna.
+Mais de 85 scripts organizados em 10 categorias.
 
-## ⚡ Execução Rápida (Copie e Cole)
-
-Abra o **PowerShell como Administrador** e execute:
-
-```powershell
-iwr -useb https://raw.githubusercontent.com/lobaotech/otzremoto/main/gui_optimizer.ps1 | iex
-```
-
-## ✨ Como funciona:
-
-1.  O comando acima baixa e executa o script `gui_optimizer.ps1` diretamente do GitHub.
-2.  Uma janela gráfica será exibida, permitindo que você selecione os módulos de otimização desejados através de abas e checkboxes.
-3.  Ao clicar em "Executar Otimizações", o script baixará e executará apenas os scripts selecionados, em tempo real, mostrando o progresso em um log.
-
-## 📂 Módulos de Otimização Disponíveis (Pack Premium):
-
--   **Preparação**: Crie pontos de restauração e backup do registro antes de otimizar.
--   **CPU & Energia**: Ajustes para máximo desempenho do processador e planos de energia.
--   **GPU & Vídeo**: Otimizações para placas de vídeo NVIDIA, AMD e Intel.
--   **Rede & DNS**: Redução de latência de rede e configuração de DNS otimizado.
--   **Input Lag**: Minimização de atrasos em mouse, teclado e outros periféricos.
--   **Memória RAM**: Ajustes para melhor gerenciamento e uso da memória.
--   **Debloater**: Remoção de aplicativos indesejados e telemetria do Windows.
--   **Limpeza**: Limpeza profunda de arquivos temporários e otimização do sistema.
--   **Inicialização**: Otimização do tempo de boot e gerenciamento de serviços.
--   **Jogos**: Scripts específicos para jogos populares como CS2, Valorant, Fortnite, etc.
--   **Extras**: Componentes adicionais e otimizações específicas (SSD/NVMe, áudio).
--   **Reparo**: Ferramentas para verificar e reparar a integridade do sistema.
--   **Ferramentas**: Download de ferramentas de terceiros úteis.
-
-## ⚠️ Requisitos:
-
--   Windows 10 ou Windows 11
--   PowerShell 5.0+
--   Privilégios de Administrador
--   Conexão com a internet
-
-## 🔒 Segurança:
-
-Todos os scripts são transparentes e podem ser revisados no repositório GitHub. O script `gui_optimizer.ps1` cria um ponto de restauração antes de aplicar as otimizações, garantindo a segurança do seu sistema.
+© 2026 Lobo Tech — Todos os direitos reservados.
 
 ---
 
-**Atenção**: Este repositório contém o Pack Premium completo. Para otimizações básicas gratuitas, consulte a página principal do projeto.
+## 🚀 Execução Remota (1 Comando)
+
+Abra o **PowerShell como Administrador** e cole:
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/lobaotech/otzremoto/main/launcher.ps1 | iex
+```
+
+O launcher irá automaticamente:
+1. Verificar/instalar Python se necessário
+2. Instalar dependências (CustomTkinter)
+3. Abrir a interface gráfica premium
+
+---
+
+## 📦 Gerar .EXE (Distribuição)
+
+Para distribuir como executável independente:
+
+1. Instale Python 3.10+ — [python.org](https://python.org)
+2. Execute `build_exe.bat`
+3. O executável será gerado em `dist/LoboAlpha_V2.exe`
+
+---
+
+## 📂 Estrutura
+
+| Ficheiro | Descrição |
+|---|---|
+| `lobo_alpha_v2.py` | Interface gráfica principal (CustomTkinter) |
+| `launcher.ps1` | Launcher remoto via PowerShell |
+| `build_exe.bat` | Script para gerar .EXE |
+| `01-12_*/` | 85+ scripts de otimização organizados por categoria |
+
+---
+
+## 🎯 Categorias de Otimização
+
+- ⚡ CPU & Energia (9 scripts)
+- 🎮 GPU & Vídeo (8 scripts)
+- 🌐 Rede & DNS (14 scripts)
+- 🖱️ Input Lag (11 scripts)
+- 🎯 Gaming — CS2, Valorant, Fortnite, FiveM... (10 scripts)
+- 🛡️ Debloater & Privacidade (5 scripts)
+- 🧹 Limpeza & Manutenção (4 scripts)
+- 🚀 Boot & Serviços (9 scripts)
+- 💾 Memória RAM (2 scripts)
+- 🔧 Reparo & Diagnóstico (4 scripts)
