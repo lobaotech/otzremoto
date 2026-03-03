@@ -1,0 +1,39 @@
+Windows Registry Editor Version 5.00
+
+; Otimizações de Input Lag - FPS Machine
+
+; Buffers de Entrada de Baixa Latência
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\mouclass\Parameters]
+"MouseDataQueueSize"=dword:00000010
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\kbdclass\Parameters]
+"KeyboardDataQueueSize"=dword:00000010
+
+; Maximizar Resposta do Teclado
+[HKEY_CURRENT_USER\Control Panel\Keyboard]
+"KeyboardSpeed"="31"
+"KeyboardDelay"="1"
+"AutoRepeatRate"="500"
+
+; Desativar Economia de Energia USB
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226]
+"Attributes"=dword:00000002
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\USB]
+"DisableSelectiveSuspend"=dword:00000001
+
+; Desativar Aceleração do Mouse (MarkC Fix)
+[HKEY_CURRENT_USER\Control Panel\Mouse]
+"MouseSpeed"="0"
+"MouseThreshold1"="0"
+"MouseThreshold2"="0"
+
+; Desativar Teclas de Aderência e Acesso
+[HKEY_CURRENT_USER\Control Panel\Accessibility\StickyKeys]
+"Flags"="506"
+
+[HKEY_CURRENT_USER\Control Panel\Accessibility\Keyboard Response]
+"Flags"="122"
+
+[HKEY_CURRENT_USER\Control Panel\Accessibility\ToggleKeys]
+"Flags"="58"
