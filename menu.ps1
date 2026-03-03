@@ -1,7 +1,7 @@
 # ==================================================================================================
-# 🐺 LOBO ALPHA V2.0 - CYBERPUNK EDITION
+# 🐺 LOBO ALPHA V2.0 - ULTRA CYBERPUNK EDITION
 # ==================================================================================================
-# Design Futurista | Cores: Lobo Tech Neon | Estilo: High-Performance
+# Design Customizado | Cores: Lobo Tech Neon | Estilo: High-Performance GUI
 # ==================================================================================================
 
 # --- CONFIGURAÇÕES --- #
@@ -29,7 +29,7 @@ $Color_Neon_Magenta = [System.Drawing.ColorTranslator]::FromHtml("#ff00ff")
 $Color_Text_Main = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
 $Color_Text_Dim = [System.Drawing.ColorTranslator]::FromHtml("#888888")
 $Color_Log_BG = [System.Drawing.ColorTranslator]::FromHtml("#0a0a0a")
-$Color_Log_Text = [System.Drawing.ColorTranslator]::FromHtml("#00ffcc") # Ciano Cyber
+$Color_Log_Text = [System.Drawing.ColorTranslator]::FromHtml("#00ffcc")
 
 $Font_Title = New-Object System.Drawing.Font("Segoe UI Semibold", 18)
 $Font_Tab = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
@@ -62,7 +62,7 @@ function Run-ScriptContent($Content, $Name) {
 # --- JANELA PRINCIPAL --- #
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "🐺 LOBO ALPHA V2.0 | CYBERPUNK INTERFACE"
-$form.Size = New-Object System.Drawing.Size(950, 700)
+$form.Size = New-Object System.Drawing.Size(1000, 750)
 $form.BackColor = $Color_BG
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedSingle"
@@ -70,32 +70,46 @@ $form.MaximizeBox = $false
 
 # --- HEADER NEON --- #
 $pnlHeader = New-Object System.Windows.Forms.Panel
-$pnlHeader.Size = New-Object System.Drawing.Size(950, 80)
+$pnlHeader.Size = New-Object System.Drawing.Size(1000, 100)
 $pnlHeader.BackColor = $Color_Panel
+$pnlHeader.BorderStyle = "None"
 $form.Controls.Add($pnlHeader)
+
+# Borda Neon no Header
+$pnlHeader.Add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen($Color_Neon_Purple, 2)
+    $e.Graphics.DrawLine($pen, 0, 98, 1000, 98)
+})
 
 $lblTitle = New-Object System.Windows.Forms.Label
 $lblTitle.Text = "LOBO ALPHA V2.0 // DOMINE SEU HARDWARE"
 $lblTitle.Font = $Font_Title
 $lblTitle.ForeColor = $Color_Neon_Purple
-$lblTitle.Location = New-Object System.Drawing.Point(30, 20)
+$lblTitle.Location = New-Object System.Drawing.Point(40, 30)
 $lblTitle.AutoSize = $true
 $pnlHeader.Controls.Add($lblTitle)
 
-$lblSub = New-Object System.Windows.Forms.Label
-$lblSub.Text = "PROTOCOL: PERFORMANCE_MAX // STATUS: READY"
-$lblSub.Font = New-Object System.Drawing.Font("Segoe UI", 8)
-$lblSub.ForeColor = $Color_Text_Dim
-$lblSub.Location = New-Object System.Drawing.Point(32, 50)
-$lblSub.AutoSize = $true
-$pnlHeader.Controls.Add($lblSub)
+# --- TAB CONTROL CUSTOMIZADO --- #
+# Para evitar o visual cinza do Windows, vamos usar botões como abas
+$pnlTabs = New-Object System.Windows.Forms.Panel
+$pnlTabs.Location = New-Object System.Drawing.Point(40, 120)
+$pnlTabs.Size = New-Object System.Drawing.Size(920, 40)
+$form.Controls.Add($pnlTabs)
 
-# --- TAB CONTROL ESTILIZADO --- #
-$tabs = New-Object System.Windows.Forms.TabControl
-$tabs.Location = New-Object System.Drawing.Point(30, 100)
-$tabs.Size = New-Object System.Drawing.Size(880, 400)
-$tabs.BackColor = $Color_BG
-$form.Controls.Add($tabs)
+$pnlContent = New-Object System.Windows.Forms.Panel
+$pnlContent.Location = New-Object System.Drawing.Point(40, 160)
+$pnlContent.Size = New-Object System.Drawing.Size(920, 350)
+$pnlContent.BackColor = $Color_Panel
+$pnlContent.BorderStyle = "FixedSingle"
+$form.Controls.Add($pnlContent)
+
+# Borda Neon no Painel de Conteúdo
+$pnlContent.Add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen($Color_Neon_Purple, 1)
+    $e.Graphics.DrawRectangle($pen, 0, 0, $s.Width-1, $s.Height-1)
+})
 
 # --- DEFINIÇÃO DE CATEGORIAS --- #
 $Modules = @(
@@ -108,11 +122,12 @@ $Modules = @(
 )
 
 $checks = @{}
+$tabButtons = @()
+$currentTab = $null
 
-foreach ($m in $Modules) {
-    $tp = New-Object System.Windows.Forms.TabPage($m.Title)
-    $tp.BackColor = $Color_Panel
-    $tabs.TabPages.Add($tp)
+function Show-Tab($index) {
+    $pnlContent.Controls.Clear()
+    $m = $Modules[$index]
     
     $y = 20
     foreach ($s in $m.Scripts) {
@@ -124,11 +139,50 @@ foreach ($m in $Modules) {
         $cb.AutoSize = $true
         $cb.FlatStyle = "Flat"
         $cb.FlatAppearance.CheckedBackColor = $Color_Neon_Purple
-        $tp.Controls.Add($cb)
-        $checks["$($m.Path)/$s"] = $cb
+        $cb.FlatAppearance.BorderColor = $Color_Neon_Purple
+        
+        # Manter estado do checkbox
+        $key = "$($m.Path)/$s"
+        if ($checks.ContainsKey($key)) {
+            $cb.Checked = $checks[$key].Checked
+        }
+        $checks[$key] = $cb
+        
+        $pnlContent.Controls.Add($cb)
         $y += 35
     }
+    
+    # Atualizar visual dos botões de aba
+    for ($i=0; $i -lt $tabButtons.Count; $i++) {
+        if ($i -eq $index) {
+            $tabButtons[$i].BackColor = $Color_Neon_Purple
+            $tabButtons[$i].ForeColor = $Color_Text_Main
+        } else {
+            $tabButtons[$i].BackColor = $Color_Panel
+            $tabButtons[$i].ForeColor = $Color_Text_Dim
+        }
+    }
 }
+
+$tabX = 0
+for ($i=0; $i -lt $Modules.Count; $i++) {
+    $btnTab = New-Object System.Windows.Forms.Button
+    $btnTab.Text = $Modules[$i].Title
+    $btnTab.Size = New-Object System.Drawing.Size(120, 40)
+    $btnTab.Location = New-Object System.Drawing.Point($tabX, 0)
+    $btnTab.FlatStyle = "Flat"
+    $btnTab.FlatAppearance.BorderSize = 1
+    $btnTab.FlatAppearance.BorderColor = $Color_Neon_Purple
+    $btnTab.Font = $Font_Tab
+    $index = $i
+    $btnTab.Add_Click({ Show-Tab $index })
+    $pnlTabs.Controls.Add($btnTab)
+    $tabButtons += $btnTab
+    $tabX += 125
+}
+
+# Mostrar primeira aba por padrão
+Show-Tab 0
 
 # --- LOG CONSOLE --- #
 $log = New-Object System.Windows.Forms.TextBox
@@ -137,11 +191,19 @@ $log.ReadOnly = $true
 $log.BackColor = $Color_Log_BG
 $log.ForeColor = $Color_Log_Text
 $log.Font = $Font_Log
-$log.Location = New-Object System.Drawing.Point(30, 520)
-$log.Size = New-Object System.Drawing.Size(650, 120)
+$log.Location = New-Object System.Drawing.Point(40, 530)
+$log.Size = New-Object System.Drawing.Size(680, 150)
 $log.BorderStyle = "None"
 $log.ScrollBars = "Vertical"
 $form.Controls.Add($log)
+
+# Borda Neon no Log
+$logPanel = New-Object System.Windows.Forms.Panel
+$logPanel.Location = New-Object System.Drawing.Point(39, 529)
+$logPanel.Size = New-Object System.Drawing.Size(682, 152)
+$logPanel.BackColor = $Color_Neon_Purple
+$form.Controls.Add($logPanel)
+$logPanel.SendToBack()
 
 # --- BOTÕES DE AÇÃO --- #
 $btnRun = New-Object System.Windows.Forms.Button
@@ -149,9 +211,9 @@ $btnRun.Text = "APLICAR TWEAKS"
 $btnRun.BackColor = $Color_Neon_Purple
 $btnRun.ForeColor = $Color_Text_Main
 $btnRun.FlatStyle = "Flat"
-$btnRun.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
-$btnRun.Location = New-Object System.Drawing.Point(700, 520)
-$btnRun.Size = New-Object System.Drawing.Size(210, 55)
+$btnRun.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
+$btnRun.Location = New-Object System.Drawing.Point(740, 530)
+$btnRun.Size = New-Object System.Drawing.Size(220, 70)
 $btnRun.FlatAppearance.BorderSize = 0
 $form.Controls.Add($btnRun)
 
@@ -160,10 +222,11 @@ $btnRestore.Text = "RESTORE POINT"
 $btnRestore.BackColor = $Color_Panel
 $btnRestore.ForeColor = $Color_Neon_Magenta
 $btnRestore.FlatStyle = "Flat"
-$btnRestore.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
-$btnRestore.Location = New-Object System.Drawing.Point(700, 585)
-$btnRestore.Size = New-Object System.Drawing.Size(210, 55)
+$btnRestore.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
+$btnRestore.Location = New-Object System.Drawing.Point(740, 610)
+$btnRestore.Size = New-Object System.Drawing.Size(220, 70)
 $btnRestore.FlatAppearance.BorderColor = $Color_Neon_Magenta
+$btnRestore.FlatAppearance.BorderSize = 2
 $form.Controls.Add($btnRestore)
 
 # --- LÓGICA DE EXECUÇÃO --- #
