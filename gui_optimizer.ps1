@@ -1,5 +1,5 @@
 # ==================================================================================================
-# 🚀 OTIMIZADOR DE PC REMOTO - GUI v1.0
+# 🚀 OTIMIZADOR DE PC REMOTO - GUI v1.1 (CORRIGIDO)
 # ==================================================================================================
 #
 # Este script cria uma interface gráfica para selecionar e executar otimizações do Pack Premium
@@ -56,7 +56,7 @@ function Invoke-ScriptBlockFromContent($Content, $Type) {
     Remove-Item -Path $tempFile.FullName -Force -ErrorAction SilentlyContinue
 }
 
-# --- DEFINIÇÃO DOS MÓDULOS DE OTIMIZAÇÃO (Expandido) --- #
+# --- DEFINIÇÃO DOS MÓDULOS DE OTIMIZAÇÃO --- #
 
 $OptimizationCategories = @(
     @{ Name = "Preparação"; Path = "01_Preparacao_e_Backup"; Scripts = @("01_CRIAR_PONTO_RESTAURACAO.bat", "02_BACKUP_REGISTRO_COMPLETO.bat") },
@@ -69,47 +69,45 @@ $OptimizationCategories = @(
     @{ Name = "Limpeza"; Path = "08_Limpeza_e_Manutencao"; Scripts = @("08_limpeza_profunda.bat", "11_limpar_logs_eventos.bat", "13_remover_bloatware.bat") },
     @{ Name = "Inicialização"; Path = "09_Inicializacao_e_Servicos"; Scripts = @("01_desativar_superfetch.bat", "02_otimizar_servicos_jogos.bat", "03_otimizar_boot.bat", "04_desativar_apps_inicializacao.bat", "05_desativar_indexacao.bat", "06_desativar_spooler.bat", "07_desativar_windows_update.bat", "10_resetar_cache_update.bat", "14_desativar_apps_segundo_plano.bat") },
     @{ Name = "Jogos"; Path = "10_Otimizacoes_por_Jogo"; Scripts = @("01_otimizar_jogo_generico.bat", "02_otimizar_cs2.bat", "03_otimizar_fortnite.bat", "04_otimizar_valorant.bat", "05_otimizar_gta_v.bat", "06_otimizar_fivem.bat", "07_otimizar_roblox.bat", "08_otimizar_minecraft.bat", "09_otimizar_battlefield.bat", "10_otimizar_rdr2.bat") },
-    @{ Name = "Extras"; Path = "11_Extras_e_Componentes"; Scripts = @("20_privacidade_debloat.bat", "21_instalar_componentes.bat", "22_otimizacao_ssd_nvme.bat", "23_latencia_audio.bat", "scripts_reg/privacidade_debloat.reg") },
-    @{ Name = "Reparo"; Path = "12_Reparo_e_Diagnostico"; Scripts = @("16_dism_restaurar_saude.bat", "17_sfc_scannow.bat", "18_agendar_chkdsk.bat", "19_atualizar_drivers_so.bat") },
-    @{ Name = "Ferramentas"; Path = "13_Ferramentas_Terceiros"; Scripts = @("01_baixar_ferramentas.bat") }
+    @{ Name = "Reparo"; Path = "12_Reparo_e_Diagnostico"; Scripts = @("16_dism_restaurar_saude.bat", "17_sfc_scannow.bat", "18_agendar_chkdsk.bat", "19_atualizar_drivers_so.bat") }
 )
 
 # --- CRIAÇÃO DA JANELA PRINCIPAL --- #
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "OTIMIZADOR DE PC REMOTO - GUI v1.0"
+$form.Text = "OTIMIZADOR DE PC REMOTO - GUI v1.1"
 $form.Size = New-Object System.Drawing.Size(800, 600)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedSingle"
 $form.MaximizeBox = $false
 $form.MinimizeBox = $false
-$form.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#000000") # Fundo preto da landing page
-$form.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF") # Texto branco
+$form.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#000000")
+$form.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
 
 # --- CONTROLE DE ABAS (TabControl) --- #
 $tabControl = New-Object System.Windows.Forms.TabControl
-$tabControl.Dock = "Fill"
-$tabControl.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#000000") # Fundo preto
-$tabControl.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF") # Texto branco
+$tabControl.Size = New-Object System.Drawing.Size(780, 400)
+$tabControl.Location = New-Object System.Drawing.Point(10, 10)
+$tabControl.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#000000")
+$tabControl.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
 $tabControl.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 $form.Controls.Add($tabControl)
 
 # --- ADICIONAR ABAS E CHECKBOXES --- #
 $checkboxes = @{}
-$yPos = 10
 
 foreach ($category in $OptimizationCategories) {
     $tabPage = New-Object System.Windows.Forms.TabPage($category.Name)
-    $tabPage.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#1a1a1a") # Um cinza bem escuro para as abas
+    $tabPage.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#1a1a1a")
     $tabPage.AutoScroll = $true
     $tabControl.Controls.Add($tabPage)
 
-    $yPos = 10 # Reset Y position for each tab
+    $yPos = 10
     foreach ($script in $category.Scripts) {
         $checkbox = New-Object System.Windows.Forms.CheckBox
         $checkbox.Text = $script
         $checkbox.Location = New-Object System.Drawing.Point(10, $yPos)
         $checkbox.AutoSize = $true
-        $checkbox.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF") # Texto branco
+        $checkbox.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
         $checkbox.Font = New-Object System.Drawing.Font("Segoe UI", 9)
         $tabPage.Controls.Add($checkbox)
         $checkboxes["$($category.Path)/$script"] = $checkbox
@@ -120,12 +118,13 @@ foreach ($category in $OptimizationCategories) {
 # --- BOTÃO EXECUTAR --- #
 $btnExecute = New-Object System.Windows.Forms.Button
 $btnExecute.Text = "Executar Otimizações"
-$btnExecute.Location = New-Object System.Drawing.Point(10, $form.Height - 80)
-$btnExecute.Size = New-Object System.Drawing.Size(150, 30)
-$btnExecute.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#9933ff") # Roxo vibrante da landing page
-$btnExecute.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#ffffff") # Texto branco
+$btnExecute.Location = New-Object System.Drawing.Point(10, 420)
+$btnExecute.Size = New-Object System.Drawing.Size(150, 40)
+$btnExecute.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#9933ff")
+$btnExecute.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#ffffff")
 $btnExecute.FlatStyle = "Flat"
 $btnExecute.FlatAppearance.BorderSize = 0
+$btnExecute.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
 $form.Controls.Add($btnExecute)
 
 # --- LOG DE EXECUÇÃO --- #
@@ -133,10 +132,10 @@ $logTextBox = New-Object System.Windows.Forms.TextBox
 $logTextBox.Multiline = $true
 $logTextBox.ReadOnly = $true
 $logTextBox.ScrollBars = "Vertical"
-$logTextBox.Location = New-Object System.Drawing.Point(170, $form.Height - 150)
-$logTextBox.Size = New-Object System.Drawing.Size($form.Width - 200, 100)
-$logTextBox.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#1e1e1e") # Fundo escuro para o log
-$logTextBox.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#00ff00") # Texto verde para o log
+$logTextBox.Location = New-Object System.Drawing.Point(170, 420)
+$logTextBox.Size = New-Object System.Drawing.Size(600, 130)
+$logTextBox.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#1e1e1e")
+$logTextBox.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#00ff00")
 $logTextBox.Font = New-Object System.Drawing.Font("Consolas", 9)
 $form.Controls.Add($logTextBox)
 
