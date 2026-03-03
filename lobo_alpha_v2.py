@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-╔══════════════════════════════════════════════════════════════╗
-║           LOBO ALPHA V2.0 - PREMIUM EDITION                 ║
-║           Toolkit de Otimização Windows                      ║
-║           © 2026 Lobo Tech - Todos os direitos reservados    ║
-╚══════════════════════════════════════════════════════════════╝
+================================================================
+  LOBO ALPHA V2.0 - PREMIUM EDITION
+  Toolkit de Otimizacao Windows
+  (c) 2026 Lobo Tech - Todos os direitos reservados
+================================================================
 
-Interface gráfica moderna em Python (CustomTkinter).
-Executa scripts de otimização remotamente do GitHub.
+Interface grafica moderna em Python (CustomTkinter).
+Executa scripts de otimizacao remotamente do GitHub.
 """
 
 import customtkinter as ctk
@@ -22,9 +22,9 @@ import ssl
 import ctypes
 import datetime
 
-# ══════════════════════════════════════════════════════════════
-# CONFIGURAÇÕES
-# ══════════════════════════════════════════════════════════════
+# ================================================================
+# CONFIGURACOES
+# ================================================================
 
 REPO_BASE = "https://raw.githubusercontent.com/lobaotech/otzremoto/main"
 APP_VERSION = "2.0.0"
@@ -46,9 +46,9 @@ COLORS = {
     "error": "#ff4444",
 }
 
-# ══════════════════════════════════════════════════════════════
-# DEFINIÇÃO DOS MÓDULOS DE OTIMIZAÇÃO
-# ══════════════════════════════════════════════════════════════
+# ================================================================
+# DEFINICAO DOS MODULOS DE OTIMIZACAO
+# ================================================================
 
 MODULES = {
     "⚡ CPU & Energia": {
@@ -169,9 +169,9 @@ MODULES = {
     },
 }
 
-# ══════════════════════════════════════════════════════════════
-# VERIFICAÇÃO DE ADMINISTRADOR
-# ══════════════════════════════════════════════════════════════
+# ================================================================
+# VERIFICACAO DE ADMINISTRADOR
+# ================================================================
 
 def is_admin():
     """Verifica se o programa está a correr como administrador."""
@@ -192,9 +192,9 @@ def run_as_admin():
         pass
 
 
-# ══════════════════════════════════════════════════════════════
-# CLASSE PRINCIPAL DA APLICAÇÃO
-# ══════════════════════════════════════════════════════════════
+# ================================================================
+# CLASSE PRINCIPAL DA APLICACAO
+# ================================================================
 
 class LoboAlphaApp(ctk.CTk):
     def __init__(self):
@@ -694,9 +694,9 @@ class LoboAlphaApp(ctk.CTk):
         thread.start()
 
 
-# ══════════════════════════════════════════════════════════════
+# ================================================================
 # PONTO DE ENTRADA
-# ══════════════════════════════════════════════════════════════
+# ================================================================
 
 def main():
     # Verificar administrador (apenas no Windows)
