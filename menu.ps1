@@ -1,10 +1,7 @@
 # ==================================================================================================
-# 🚀 OTIMIZADOR DE PC REMOTO - v3.1 SUPERIOR
+# 🐺 LOBO ALPHA V2.0 - OTIMIZADOR PROFISSIONAL
 # ==================================================================================================
-#
-# Este script baixa e executa o Pack de Otimização Premium diretamente do GitHub.
-# Interface interativa para selecionar e aplicar otimizações em tempo real.
-#
+# Inspirado no WinUtil do Chris Titus | Cores: Lobo Tech Brand
 # ==================================================================================================
 
 # --- CONFIGURAÇÕES --- #
@@ -15,149 +12,170 @@ $BaseUrl = "https://raw.githubusercontent.com/$RepoOwner/$RepoName/$Branch"
 
 # --- VERIFICAÇÃO DE ADMINISTRADOR --- #
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Warning "ERRO: Este script precisa ser executado como Administrador."
-    Write-Warning "Clique com o botão direito no PowerShell e selecione 'Executar como Administrador'."
-    Read-Host "Pressione Enter para sair..."
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.MessageBox]::Show("Por favor, execute o PowerShell como Administrador para usar o Lobo Alpha V2.0.", "Acesso Negado", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     exit
 }
 
-# --- FUNÇÕES CORE --- #
+# --- CARREGAR ASSEMBLIES --- #
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
 
-# Função para baixar conteúdo de um script do GitHub
-function Get-RemoteScriptContent($RelativePath) {
-    $Url = "$BaseUrl/$($RelativePath.Replace(' ', '%20'))"
-    try {
-        $response = Invoke-WebRequest -Uri $Url -UseBasicParsing
-        if ($response.StatusCode -eq 200) {
-            return $response.Content
-        } else {
-            Write-Error "Falha ao baixar o script: $($response.StatusCode) - $Url"
-            return $null
-        }
-    } catch {
-        Write-Error "Exceção ao baixar o script: $_ - $Url"
-        return $null
-    }
+# --- ESTILO VISUAL (LOBO TECH) --- #
+$Color_BG = [System.Drawing.ColorTranslator]::FromHtml("#000000")
+$Color_Panel = [System.Drawing.ColorTranslator]::FromHtml("#0a0a0a")
+$Color_Accent = [System.Drawing.ColorTranslator]::FromHtml("#9933ff") # Roxo Lobo
+$Color_Text = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+$Color_Log = [System.Drawing.ColorTranslator]::FromHtml("#1e1e1e")
+$Font_Main = New-Object System.Drawing.Font("Segoe UI", 10)
+$Font_Title = New-Object System.Drawing.Font("Segoe UI Semibold", 14)
+
+# --- FUNÇÕES DE EXECUÇÃO --- #
+function Get-RemoteScript($Path) {
+    $Url = "$BaseUrl/$($Path.Replace(" ", "%20"))"
+    try { return (Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 10).Content } catch { return $null }
 }
 
-# Função para executar um bloco de script (BAT ou REG)
-function Invoke-ScriptBlockFromContent($Content, $Type) {
-    $tempFile = New-Item -Path $env:TEMP -Name "temp_script.$Type" -ItemType File -Force
-    Set-Content -Path $tempFile.FullName -Value $Content -Encoding Ascii
-
-    if ($Type -eq "bat") {
-        Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$($tempFile.FullName)`"" -Wait -Verb RunAs
-    } elseif ($Type -eq "reg") {
-        Start-Process -FilePath "reg.exe" -ArgumentList "import `"$($tempFile.FullName)`"" -Wait -Verb RunAs
+function Run-ScriptContent($Content, $Name) {
+    if (-not $Content) { return "Erro ao baixar $Name" }
+    $ext = [System.IO.Path]::GetExtension($Name).ToLower()
+    $temp = Join-Path $env:TEMP "lobo_temp_$($Name.Replace("/", "_"))"
+    Set-Content -Path $temp -Value $Content -Encoding Ascii
+    
+    if ($ext -eq ".bat") {
+        $p = Start-Process cmd.exe -ArgumentList "/c `"$temp`"" -PassThru -WindowStyle Hidden
+        $p.WaitForExit()
+    } elseif ($ext -eq ".reg") {
+        $p = Start-Process reg.exe -ArgumentList "import `"$temp`"" -PassThru -WindowStyle Hidden
+        $p.WaitForExit()
     }
-
-    Remove-Item -Path $tempFile.FullName -Force
+    Remove-Item $temp -Force -ErrorAction SilentlyContinue
+    return "OK"
 }
 
-# --- DEFINIÇÃO DOS MÓDULOS DE OTIMIZAÇÃO --- #
+# --- JANELA PRINCIPAL --- #
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "🐺 LOBO ALPHA V2.0 | Domine seu Hardware"
+$form.Size = New-Object System.Drawing.Size(900, 650)
+$form.BackColor = $Color_BG
+$form.StartPosition = "CenterScreen"
+$form.FormBorderStyle = "FixedSingle"
+$form.MaximizeBox = $false
 
-$OptimizationModules = @(
-    @{ Name = "Preparação e Backup"; Path = "01_Preparacao_e_Backup"; Scripts = @("01_CRIAR_PONTO_RESTAURACAO.bat", "02_BACKUP_REGISTRO_COMPLETO.bat"); Selected = $false },
-    @{ Name = "Otimização de CPU e Energia"; Path = "02_Otimizacao_CPU_e_Energia"; Scripts = @("01_plano_desempenho_maximo.bat", "02_desbloquear_atributos_energia.bat", "04_prioridade_cpu_amd.bat", "06_desativar_core_parking.bat", "07_win32_priority_separation.bat", "08_desativar_estrangulamento_energia.bat", "09_limpar_planos_energia.bat", "Planos_Especificos/01_plano_energia_amd.bat", "Planos_Especificos/02_plano_energia_intel.bat", "otimizacoes_energia.reg"); Selected = $false },
-    @{ Name = "Otimização de GPU e Vídeo"; Path = "03_Otimizacao_GPU_e_Video"; Scripts = @("03_agendador_multimidia_jogos.bat", "05_agendamento_gpu_hardware.bat", "06_escala_gpu.bat", "09_gamedvr_tela_cheia.bat", "12_resetar_cache_shader.bat", "15_bloquear_updates_driver.bat", "Limpeza_Cache_Shader/01_limpar_cache_nvidia.bat", "Limpeza_Cache_Shader/02_limpar_cache_amd.bat", "Limpeza_Cache_Shader/03_limpar_cache_intel.bat"); Selected = $false },
-    @{ Name = "Rede e DNS"; Path = "04_Rede_e_DNS"; Scripts = @("01_reset_rede.bat", "02_receive_side_scaling.bat", "03_tcp_autotuning.bat", "04_mtu_1400.bat", "05_desativar_ipv6.bat", "06_tcp_nodelay.bat", "07_indice_estrangulamento.bat", "08_tcp_coalescing.bat", "09_remover_qos.bat", "10_limpar_dns.bat", "11_dns_cloudflare.bat", "12_dns_google.bat", "13_dns_opendns.bat", "otimizacoes_rede.reg", "otimizador_rede.bat"); Selected = $false },
-    @{ Name = "Input Lag e Periféricos"; Path = "05_Input_Lag_e_Perifericos"; Scripts = @("01_buffers_entrada.bat", "02_resposta_teclado.bat", "03_desativar_hpet.bat", "04_economia_usb.bat", "05_modo_msi.bat", "07_timer_resolution.bat", "08_aceleracao_mouse.bat", "09_teclas_aderencia.bat", "10_diagnostico_dpc.bat", "otimizacoes_input_lag.reg", "otimizador_input_lag.bat"); Selected = $false },
-    @{ Name = "Memória RAM"; Path = "06_Memoria_RAM"; Scripts = @("01_ajustes_memoria_ram.bat"); Selected = $false },
-    @{ Name = "Debloater e Privacidade"; Path = "07_Debloater_e_Privacidade"; Scripts = @("01_remover_xbox_apps.bat", "02_remover_cortana.bat", "03_remover_teams.bat", "04_remover_onedrive.bat"); Selected = $false },
-    @{ Name = "Limpeza e Manutenção"; Path = "08_Limpeza_e_Manutencao"; Scripts = @("08_limpeza_profunda.bat", "11_limpar_logs_eventos.bat", "13_remover_bloatware.bat"); Selected = $false },
-    @{ Name = "Inicialização e Serviços"; Path = "09_Inicializacao_e_Servicos"; Scripts = @("01_desativar_superfetch.bat", "02_otimizar_servicos_jogos.bat", "03_otimizar_boot.bat", "04_desativar_apps_inicializacao.bat", "05_desativar_indexacao.bat", "06_desativar_spooler.bat", "07_desativar_windows_update.bat", "10_resetar_cache_update.bat", "14_desativar_apps_segundo_plano.bat"); Selected = $false },
-    @{ Name = "Otimizações por Jogo"; Path = "10_Otimizacoes_por_Jogo"; Scripts = @("01_otimizar_jogo_generico.bat", "02_otimizar_cs2.bat", "03_otimizar_fortnite.bat", "04_otimizar_valorant.bat", "05_otimizar_gta_v.bat", "06_otimizar_fivem.bat", "07_otimizar_roblox.bat", "08_otimizar_minecraft.bat", "09_otimizar_battlefield.bat", "10_otimizar_rdr2.bat"); Selected = $false },
-    @{ Name = "Extras e Componentes"; Path = "11_Extras_e_Componentes"; Scripts = @("20_privacidade_debloat.bat", "21_instalar_componentes.bat", "22_otimizacao_ssd_nvme.bat", "23_latencia_audio.bat", "scripts_reg/privacidade_debloat.reg"); Selected = $false },
-    @{ Name = "Reparo e Diagnóstico"; Path = "12_Reparo_e_Diagnostico"; Scripts = @("16_dism_restaurar_saude.bat", "17_sfc_scannow.bat", "18_agendar_chkdsk.bat", "19_atualizar_drivers_so.bat"); Selected = $false },
-    @{ Name = "Ferramentas de Terceiros"; Path = "13_Ferramentas_Terceiros"; Scripts = @("01_baixar_ferramentas.bat"); Selected = $false }
+# --- HEADER --- #
+$lblTitle = New-Object System.Windows.Forms.Label
+$lblTitle.Text = "LOBO ALPHA V2.0"
+$lblTitle.Font = $Font_Title
+$lblTitle.ForeColor = $Color_Accent
+$lblTitle.Location = New-Object System.Drawing.Point(20, 15)
+$lblTitle.AutoSize = $true
+$form.Controls.Add($lblTitle)
+
+# --- TAB CONTROL --- #
+$tabs = New-Object System.Windows.Forms.TabControl
+$tabs.Location = New-Object System.Drawing.Point(20, 60)
+$tabs.Size = New-Object System.Drawing.Size(845, 400)
+$tabs.BackColor = $Color_BG
+$form.Controls.Add($tabs)
+
+# --- DEFINIÇÃO DE CATEGORIAS --- #
+$Modules = @(
+    @{ Title = "🚀 Performance"; Path = "02_Otimizacao_CPU_e_Energia"; Scripts = @("01_plano_desempenho_maximo.bat", "02_desbloquear_atributos_energia.bat", "06_desativar_core_parking.bat", "08_desativar_estrangulamento_energia.bat", "otimizacoes_energia.reg") },
+    @{ Title = "🎮 Gaming"; Path = "10_Otimizacoes_por_Jogo"; Scripts = @("01_otimizar_jogo_generico.bat", "02_otimizar_cs2.bat", "03_otimizar_fortnite.bat", "04_otimizar_valorant.bat", "06_otimizar_fivem.bat") },
+    @{ Title = "🌐 Rede/DNS"; Path = "04_Rede_e_DNS"; Scripts = @("01_reset_rede.bat", "10_limpar_dns.bat", "11_dns_cloudflare.bat", "otimizador_rede.bat") },
+    @{ Title = "🖱️ Input Lag"; Path = "05_Input_Lag_e_Perifericos"; Scripts = @("03_desativar_hpet.bat", "07_timer_resolution.bat", "08_aceleracao_mouse.bat", "otimizador_input_lag.bat") },
+    @{ Title = "🧹 Limpeza"; Path = "08_Limpeza_e_Manutencao"; Scripts = @("08_limpeza_profunda.bat", "11_limpar_logs_eventos.bat", "13_remover_bloatware.bat") },
+    @{ Title = "🛡️ Sistema"; Path = "07_Debloater_e_Privacidade"; Scripts = @("01_remover_xbox_apps.bat", "04_remover_onedrive.bat", "README.md") }
 )
 
-# --- LÓGICA DO MENU --- #
+$checks = @{}
 
-function Show-Menu {
-    Clear-Host
-    Write-Host "==================================================" -ForegroundColor Cyan
-    Write-Host "   OTIMIZADOR DE PC REMOTO - v3.1 SUPERIOR" -ForegroundColor White
-    Write-Host "==================================================" -ForegroundColor Cyan
-    Write-Host "Selecione os módulos de otimização que deseja aplicar:" -ForegroundColor Yellow
-    Write-Host ""
-
-    for ($i = 0; $i -lt $OptimizationModules.Count; $i++) {
-        $module = $OptimizationModules[$i]
-        $status = if ($module.Selected) { "[X]" } else { "[ ]" }
-        Write-Host ("{0,3}. {1} {2}" -f ($i + 1), $status, $module.Name)
+foreach ($m in $Modules) {
+    $tp = New-Object System.Windows.Forms.TabPage($m.Title)
+    $tp.BackColor = $Color_Panel
+    $tabs.TabPages.Add($tp)
+    
+    $y = 15
+    foreach ($s in $m.Scripts) {
+        if ($s.EndsWith(".bat") -or $s.EndsWith(".reg")) {
+            $cb = New-Object System.Windows.Forms.CheckBox
+            $cb.Text = $s
+            $cb.ForeColor = $Color_Text
+            $cb.Location = New-Object System.Drawing.Point(20, $y)
+            $cb.AutoSize = $true
+            $tp.Controls.Add($cb)
+            $checks["$($m.Path)/$s"] = $cb
+            $y += 30
+        }
     }
-
-    Write-Host ""
-    Write-Host "--------------------------------------------------" -ForegroundColor Gray
-    Write-Host " A. Selecionar Todos" -ForegroundColor Green
-    Write-Host " L. Limpar Seleção" -ForegroundColor Yellow
-    Write-Host " G. GO! Iniciar Otimização" -ForegroundColor Cyan
-    Write-Host " S. Sair" -ForegroundColor Red
-    Write-Host "--------------------------------------------------" -ForegroundColor Gray
 }
 
-# --- LOOP PRINCIPAL --- #
+# --- LOG BOX --- #
+$log = New-Object System.Windows.Forms.TextBox
+$log.Multiline = $true
+$log.ReadOnly = $true
+$log.BackColor = $Color_Log
+$log.ForeColor = [System.Drawing.Color]::LimeGreen
+$log.Font = New-Object System.Drawing.Font("Consolas", 9)
+$log.Location = New-Object System.Drawing.Point(20, 475)
+$log.Size = New-Object System.Drawing.Size(650, 120)
+$log.ScrollBars = "Vertical"
+$form.Controls.Add($log)
 
-do {
-    Show-Menu
-    $input = Read-Host "Digite os números (separados por vírgula), ou uma opção (A,L,G,S)"
+# --- BOTÃO EXECUTAR --- #
+$btnRun = New-Object System.Windows.Forms.Button
+$btnRun.Text = "APLICAR TWEAKS"
+$btnRun.BackColor = $Color_Accent
+$btnRun.ForeColor = $Color_Text
+$btnRun.FlatStyle = "Flat"
+$btnRun.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
+$btnRun.Location = New-Object System.Drawing.Point(685, 475)
+$btnRun.Size = New-Object System.Drawing.Size(180, 50)
+$form.Controls.Add($btnRun)
 
-    if ($input -eq 'S') { break }
+# --- BOTÃO RESTAURAR --- #
+$btnRestore = New-Object System.Windows.Forms.Button
+$btnRestore.Text = "CRIAR RESTORE POINT"
+$btnRestore.BackColor = $Color_Panel
+$btnRestore.ForeColor = $Color_Text
+$btnRestore.FlatStyle = "Flat"
+$btnRestore.Location = New-Object System.Drawing.Point(685, 545)
+$btnRestore.Size = New-Object System.Drawing.Size(180, 50)
+$form.Controls.Add($btnRestore)
 
-    if ($input -eq 'A') {
-        $OptimizationModules.ForEach({ $_.Selected = $true })
-        continue
-    }
+# --- LÓGICA --- #
+$btnRestore.Add_Click({
+    $log.AppendText("[*] Criando Ponto de Restauração...`r`n")
+    $c = Get-RemoteScript "01_Preparacao_e_Backup/01_CRIAR_PONTO_RESTAURACAO.bat"
+    $res = Run-ScriptContent $c "01_CRIAR_PONTO_RESTAURACAO.bat"
+    $log.AppendText("[+] Resultado: $res`r`n")
+})
 
-    if ($input -eq 'L') {
-        $OptimizationModules.ForEach({ $_.Selected = $false })
-        continue
-    }
-
-    if ($input -eq 'G') {
-        $selectedModules = $OptimizationModules | Where-Object { $_.Selected -eq $true }
-        if ($selectedModules.Count -eq 0) {
-            Write-Warning "Nenhum módulo selecionado!"
-            Read-Host "Pressione Enter para continuar..."
-            continue
-        }
-
-        Clear-Host
-        Write-Host "==================================================" -ForegroundColor Cyan
-        Write-Host "      INICIANDO OTIMIZAÇÃO..." -ForegroundColor White
-        Write-Host "==================================================" -ForegroundColor Cyan
-
-        foreach ($module in $selectedModules) {
-            Write-Host "`n[MODULO] $($module.Name)" -ForegroundColor Yellow
-            foreach ($scriptName in $module.Scripts) {
-                $relativePath = "$($module.Path)/$scriptName"
-                Write-Host "  -> Baixando e executando: $scriptName"
-                $content = Get-RemoteScriptContent -RelativePath $relativePath
-                if ($content) {
-                    $extension = [System.IO.Path]::GetExtension($scriptName).TrimStart('.')
-                    Invoke-ScriptBlockFromContent -Content $content -Type $extension
-                }
+$btnRun.Add_Click({
+    $log.AppendText("`r`n[!] Iniciando Otimização Lobo Alpha...`r`n")
+    $btnRun.Enabled = $false
+    
+    foreach ($key in $checks.Keys) {
+        if ($checks[$key].Checked) {
+            $log.AppendText("[>] Baixando: $key... ")
+            $content = Get-RemoteScript $key
+            if ($content) {
+                $log.AppendText("Executando... ")
+                $res = Run-ScriptContent $content $key
+                $log.AppendText("[$res]`r`n")
+            } else {
+                $log.AppendText("[ERRO]`r`n")
             }
-        }
-
-        Write-Host "`n==================================================" -ForegroundColor Green
-        Write-Host "   OTIMIZAÇÃO CONCLUÍDA!" -ForegroundColor White
-        Write-Host "   É altamente recomendável reiniciar o computador." -ForegroundColor Yellow
-        Write-Host "==================================================" -ForegroundColor Green
-        Read-Host "Pressione Enter para finalizar..."
-        break
-    }
-
-    # Processar seleção de números
-    $input.Split(',') | ForEach-Object {
-        $num = $_.Trim()
-        if ($num -match '^\d+$') {
-            $index = [int]$num - 1
-            if ($index -ge 0 -and $index -lt $OptimizationModules.Count) {
-                $OptimizationModules[$index].Selected = -not $OptimizationModules[$index].Selected
-            }
+            $log.SelectionStart = $log.Text.Length
+            $log.ScrollToCaret()
+            [System.Windows.Forms.Application]::DoEvents()
         }
     }
+    
+    $log.AppendText("`r`n[✅] PROCESSO CONCLUÍDO! REINICIE O PC.`r`n")
+    $btnRun.Enabled = $true
+    [System.Windows.Forms.MessageBox]::Show("Otimizações aplicadas com sucesso! Reinicie o computador para validar as alterações.", "Lobo Alpha V2.0", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+})
 
-} while ($true)
+# --- EXIBIR --- #
+$form.ShowDialog()
