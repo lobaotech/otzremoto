@@ -1,0 +1,23 @@
+_Windows Registry Editor Version 5.00
+
+; Otimizações de Rede e DNS - FPS Machine
+
+; Desativa o IPv6
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters]
+"DisabledComponents"=dword:000000ff
+
+; TCP No Delay & AckFreq (Desativa Nagle's Algorithm)
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces]
+; Esta chave é um placeholder. O script .bat aplicará a todos os adaptadores.
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\MSMQ\Parameters]
+"TCPNoDelay"=dword:00000001
+
+; Índice de Estrangulamento de Rede
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile]
+"NetworkThrottlingIndex"=dword:ffffffff
+
+; Remove Limite de Largura de Banda QoS
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Psched]
+"NonBestEffortLimit"=dword:00000000
+_
