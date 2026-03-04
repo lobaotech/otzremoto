@@ -250,7 +250,7 @@ class LoboAlphaApp(ctk.CTk):
         self.grid_columnconfigure(2, weight=0, minsize=340)   # Terminal
         self.grid_rowconfigure(0, weight=0)   # Header
         self.grid_rowconfigure(1, weight=1)   # Conteudo
-        self.grid_rowconfigure(2, weight=0)   # Barra inferior
+        self.grid_rowconfigure(2, weight=0, minsize=64)   # Barra inferior
 
         self._build_header()
         self._build_sidebar()
@@ -626,57 +626,57 @@ class LoboAlphaApp(ctk.CTk):
 
     def _build_bottom_bar(self):
         bottom = ctk.CTkFrame(
-            self, fg_color=C["bg_sidebar"], corner_radius=0, height=56,
-            border_width=0,
+            self, fg_color=C["bg_sidebar"], corner_radius=0, height=64,
+            border_width=1, border_color=C["purple_dark"],
         )
-        bottom.grid(row=2, column=0, columnspan=3, sticky="ew")
+        bottom.grid(row=2, column=0, columnspan=3, sticky="sew")
         bottom.grid_propagate(False)
         bottom.grid_columnconfigure(4, weight=1)
 
         # Botao Restore Point
         self.restore_btn = ctk.CTkButton(
             bottom, text="  Ponto de Restauracao",
-            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
             fg_color=C["btn_restore"], hover_color=C["btn_restore_h"],
             text_color="#FFFFFF",
-            height=38, corner_radius=R, width=200,
+            height=42, corner_radius=R, width=210,
             command=self._create_restore_point,
         )
-        self.restore_btn.grid(row=0, column=0, padx=(12, 6), pady=9)
+        self.restore_btn.grid(row=0, column=0, padx=(16, 6), pady=11)
 
         # Botao Aplicar Selecionados
         self.apply_btn = ctk.CTkButton(
             bottom, text="  Aplicar Selecionados",
-            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
             fg_color=C["btn_apply"], hover_color=C["btn_apply_h"],
             text_color=C["bg"],
-            height=38, corner_radius=R, width=200,
+            height=42, corner_radius=R, width=210,
             command=self._apply_tweaks,
         )
-        self.apply_btn.grid(row=0, column=1, padx=6, pady=9)
+        self.apply_btn.grid(row=0, column=1, padx=6, pady=11)
 
         # Botao Aplicar Tudo
         self.all_btn = ctk.CTkButton(
             bottom, text="  Aplicar Tudo",
-            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
             fg_color=C["btn_all"], hover_color=C["btn_all_h"],
             text_color="#FFFFFF",
-            height=38, corner_radius=R, width=160,
+            height=42, corner_radius=R, width=170,
             command=self._apply_all,
         )
-        self.all_btn.grid(row=0, column=2, padx=6, pady=9)
+        self.all_btn.grid(row=0, column=2, padx=6, pady=11)
 
         # Botao Parar
         self.stop_btn = ctk.CTkButton(
             bottom, text="  PARAR",
-            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
             fg_color=C["btn_stop"], hover_color=C["btn_stop_h"],
             text_color="#FFFFFF",
-            height=38, corner_radius=R, width=120,
+            height=42, corner_radius=R, width=130,
             state="disabled",
             command=self._stop_execution,
         )
-        self.stop_btn.grid(row=0, column=3, padx=6, pady=9)
+        self.stop_btn.grid(row=0, column=3, padx=6, pady=11)
 
         # Spacer
         spacer = ctk.CTkFrame(bottom, fg_color="transparent")
