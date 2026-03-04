@@ -154,12 +154,17 @@ Write-Host "[OK] Dependencias verificadas!" -ForegroundColor Green
 
 # Descarregar o script Python
 Write-Host "[>] Descarregando interface Lobo Alpha V2.0..." -ForegroundColor Cyan
-$scriptUrl = "https://raw.githubusercontent.com/lobaotech/otzremoto/main/lobo_alpha_v2.py"
+$timestamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+$scriptUrl = "https://raw.githubusercontent.com/lobaotech/otzremoto/main/lobo_alpha_v2.py?t=$timestamp"
 $scriptPath = "$env:TEMP\lobo_alpha_v2.py"
+
+# Remover versao antiga se existir
+if (Test-Path $scriptPath) { Remove-Item $scriptPath -Force }
 
 try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $scriptUrl -OutFile $scriptPath -UseBasicParsing
+    $headers = @{ 'Cache-Control' = 'no-cache'; 'Pragma' = 'no-cache' }
+    Invoke-WebRequest -Uri $scriptUrl -OutFile $scriptPath -UseBasicParsing -Headers $headers
 } catch {
     Write-Host "[ERRO] Falha ao descarregar a interface." -ForegroundColor Red
     pause
