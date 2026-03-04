@@ -250,7 +250,7 @@ class LoboAlphaApp(ctk.CTk):
 
         admin_ok = is_admin()
         status_frame = ctk.CTkFrame(
-            right, fg_color=C["success"] + "15" if admin_ok else C["error"] + "15",
+            right, fg_color="#0a1a10" if admin_ok else "#1a0a0a",
             corner_radius=8,
             border_color=C["success"] if admin_ok else C["error"],
             border_width=1,
@@ -282,7 +282,7 @@ class LoboAlphaApp(ctk.CTk):
                 text=f"{icon}  {tab_name}",
                 font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
                 fg_color=color if is_active else C["bg_card"],
-                hover_color=color + "aa",
+                hover_color=C["bg_hover"],
                 text_color=C["bg"] if is_active else color,
                 corner_radius=R,
                 height=42,
@@ -317,7 +317,7 @@ class LoboAlphaApp(ctk.CTk):
         # === ESQUERDA: Scripts ===
         left = ctk.CTkFrame(
             body, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["purple"] + "66", border_width=1,
+            border_color=C["purple_dim"], border_width=1,
         )
         left.pack(side="left", fill="both", expand=True, padx=(0, 6))
 
@@ -365,14 +365,14 @@ class LoboAlphaApp(ctk.CTk):
         ctk.CTkButton(
             hdr, text="\u2714  Marcar Tudo",
             font=ctk.CTkFont(size=11), width=100, height=26,
-            fg_color=C["purple"] + "33", hover_color=C["purple"] + "55",
+            fg_color=C["purple_dim"], hover_color=C["purple"],
             text_color=C["purple_glow"], corner_radius=6,
-            border_color=C["purple"] + "55", border_width=1,
+            border_color=C["purple_dim"], border_width=1,
             command=lambda mn=module_name: self._select_all(mn, True),
         ).pack(side="right")
 
         # Linha separadora
-        ctk.CTkFrame(parent, fg_color=C["purple"] + "33", height=1, corner_radius=0).pack(fill="x", padx=8, pady=(2, 6))
+        ctk.CTkFrame(parent, fg_color=C["purple_dim"], height=1, corner_radius=0).pack(fill="x", padx=8, pady=(2, 6))
 
         # Scripts
         for display_name, script_file in module_data["scripts"]:
@@ -389,7 +389,7 @@ class LoboAlphaApp(ctk.CTk):
                 row, text="",
                 variable=var, width=22, height=22,
                 fg_color=C["cyan"], hover_color=C["cyan_dim"],
-                border_color=C["purple"] + "88",
+                border_color=C["purple_dim"],
                 checkmark_color=C["bg"], corner_radius=6,
                 border_width=2,
             )
@@ -419,7 +419,7 @@ class LoboAlphaApp(ctk.CTk):
         # === APLICAR TWEAKS ===
         apply_card = ctk.CTkFrame(
             parent, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["magenta"] + "88", border_width=1,
+            border_color=C["magenta_dim"], border_width=1,
         )
         apply_card.pack(fill="x", pady=(0, 8))
 
@@ -446,7 +446,7 @@ class LoboAlphaApp(ctk.CTk):
         # === RESTORE POINT ===
         restore_card = ctk.CTkFrame(
             parent, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["pink"] + "66", border_width=1,
+            border_color=C["pink_dim"], border_width=1,
         )
         restore_card.pack(fill="x", pady=(0, 8))
 
@@ -470,14 +470,14 @@ class LoboAlphaApp(ctk.CTk):
             hover_color=C["purple"],
             text_color=C["text"],
             height=48, corner_radius=R,
-            border_color=C["purple"] + "66", border_width=1,
+            border_color=C["purple_dim"], border_width=1,
             command=self._apply_all,
         ).pack(fill="x", pady=(0, 10))
 
         # === INFO ===
         info_card = ctk.CTkFrame(
             parent, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["text_dim"] + "44", border_width=1,
+            border_color=C["text_dim"], border_width=1,
         )
         info_card.pack(fill="x", pady=(0, 8))
 
@@ -516,7 +516,7 @@ class LoboAlphaApp(ctk.CTk):
 
     def _build_progress_section(self):
         pf = ctk.CTkFrame(self, fg_color=C["bg_card"], corner_radius=R, height=44,
-                           border_color=C["purple"] + "44", border_width=1)
+                           border_color=C["purple_dim"], border_width=1)
         pf.pack(fill="x", padx=12, pady=(6, 0))
         pf.pack_propagate(False)
 
@@ -539,7 +539,7 @@ class LoboAlphaApp(ctk.CTk):
 
         self.progress_bar = ctk.CTkProgressBar(
             inner,
-            fg_color=C["bg"] + "cc",
+            fg_color=C["bg_input"],
             progress_color=C["magenta"],
             height=14, corner_radius=7,
         )
@@ -553,7 +553,7 @@ class LoboAlphaApp(ctk.CTk):
     def _build_console(self):
         cf = ctk.CTkFrame(
             self, fg_color=C["bg_card"], corner_radius=R, height=175,
-            border_color=C["cyan"] + "55", border_width=1,
+            border_color=C["cyan_dim"], border_width=1,
         )
         cf.pack(fill="x", padx=12, pady=(6, 0))
         cf.pack_propagate(False)
