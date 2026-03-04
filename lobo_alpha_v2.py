@@ -33,12 +33,14 @@ CREATOR = "Bruno Lobo 2026 - Analista de Sistemas"
 C = {
     # Fundos
     "bg":           "#0a0a12",
-    "bg_sidebar":   "#0d0d18",
+    "bg_header":    "#0d0d18",
     "bg_card":      "#111120",
     "bg_card_alt":  "#14142a",
     "bg_hover":     "#1c1c35",
     "bg_input":     "#0e0e1a",
     "bg_terminal":  "#080810",
+    "bg_tab":       "#0f0f20",
+    "bg_tab_sel":   "#1a1a40",
     # Cores principais
     "cyan":         "#00FFB2",
     "cyan_light":   "#33FFCC",
@@ -48,9 +50,6 @@ C = {
     "purple_light": "#BB66FF",
     "purple_dim":   "#7722CC",
     "purple_dark":  "#551199",
-    # Degrade (para referencia)
-    "grad_start":   "#00FFB2",
-    "grad_end":     "#9933FF",
     # Texto
     "text":         "#E8E8F0",
     "text_sec":     "#9999BB",
@@ -68,27 +67,23 @@ C = {
     "btn_all_h":    "#9933FF",
     "btn_stop":     "#FF4455",
     "btn_stop_h":   "#FF6677",
-    # Sidebar
-    "sb_active":    "#1a1a40",
-    "sb_hover":     "#151530",
-    "sb_border":    "#9933FF",
 }
 
-R = 8  # Raio de arredondamento
+R = 6  # Raio de arredondamento
 
 # ================================================================
 # MODULOS DE OTIMIZACAO
 # ================================================================
 
-CATEGORIES = [
-    {"key": "PERFORMANCE", "icon": "P", "label": "Performance"},
-    {"key": "GAMING",      "icon": "G", "label": "Gaming"},
-    {"key": "NETWORK",     "icon": "N", "label": "Network"},
-    {"key": "INPUT_LAG",   "icon": "I", "label": "Input Lag"},
-    {"key": "CLEANUP",     "icon": "C", "label": "Cleanup"},
-    {"key": "SYSTEM",      "icon": "S", "label": "System"},
-    {"key": "GPU",         "icon": "V", "label": "GPU"},
-    {"key": "PRIVACY",     "icon": "L", "label": "Privacidade"},
+TABS = [
+    {"key": "PERFORMANCE", "label": "Performance"},
+    {"key": "GAMING",      "label": "Gaming"},
+    {"key": "NETWORK",     "label": "Network"},
+    {"key": "INPUT_LAG",   "label": "Input Lag"},
+    {"key": "CLEANUP",     "label": "Cleanup"},
+    {"key": "SYSTEM",      "label": "System"},
+    {"key": "GPU",         "label": "GPU"},
+    {"key": "PRIVACY",     "label": "Privacidade"},
 ]
 
 MODULES = {
@@ -221,7 +216,7 @@ def run_as_admin():
         pass
 
 # ================================================================
-# APP PRINCIPAL
+# APP PRINCIPAL - LAYOUT ANTIGO (Abas superiores)
 # ================================================================
 
 class LoboAlphaApp(ctk.CTk):
@@ -229,37 +224,44 @@ class LoboAlphaApp(ctk.CTk):
         super().__init__()
 
         self.title(APP_NAME)
-        self.geometry("1360x820")
-        self.minsize(1100, 700)
+        self.geometry("1360x780")
+        self.minsize(1000, 650)
         self.configure(fg_color=C["bg"])
 
         # Estado
         self.is_running = False
         self.cancel_flag = False
         self.current_process = None
-        self.current_category = "PERFORMANCE"
-        self.checkboxes = {}  # {category: [(var, module_path, script_file), ...]}
+        self.current_tab = "PERFORMANCE"
+        self.checkboxes = {}
 
         # Admin check
         self.admin_ok = is_admin()
 
-        # Layout principal: 3 colunas
-        # [Sidebar Esquerda] [Area Central Scripts] [Terminal Direito]
-        self.grid_columnconfigure(0, weight=0, minsize=200)  # Sidebar
-        self.grid_columnconfigure(1, weight=1)                # Scripts
-        self.grid_columnconfigure(2, weight=0, minsize=340)   # Terminal
+        # Layout: 4 linhas
+        # Row 0: Header (nome + status)
+        # Row 1: Abas superiores
+        # Row 2: Conteudo (scripts esquerda + botoes direita)
+        # Row 3: Barra progresso
+        # Row 4: Terminal de execucao
+        # Row 5: Barra inferior (4 botoes de acao)
+        self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)   # Header
-        self.grid_rowconfigure(1, weight=1)   # Conteudo
-        self.grid_rowconfigure(2, weight=0, minsize=64)   # Barra inferior
+        self.grid_rowconfigure(1, weight=0)   # Abas
+        self.grid_rowconfigure(2, weight=1)   # Conteudo
+        self.grid_rowconfigure(3, weight=0)   # Progresso
+        self.grid_rowconfigure(4, weight=0, minsize=180)  # Terminal
+        self.grid_rowconfigure(5, weight=0, minsize=50)   # Botoes
 
         self._build_header()
-        self._build_sidebar()
-        self._build_scripts_area()
+        self._build_tabs()
+        self._build_content()
+        self._build_progress()
         self._build_terminal()
-        self._build_bottom_bar()
+        self._build_action_bar()
 
-        # Inicializar com primeira categoria
-        self._select_category("PERFORMANCE")
+        # Inicializar
+        self._select_tab("PERFORMANCE")
 
         # Log inicial
         self._log(f"{APP_NAME} inicializado.")
@@ -275,186 +277,224 @@ class LoboAlphaApp(ctk.CTk):
     # ============================================================
 
     def _build_header(self):
-        header = ctk.CTkFrame(self, fg_color=C["bg_sidebar"], corner_radius=0, height=52)
-        header.grid(row=0, column=0, columnspan=3, sticky="ew")
+        header = ctk.CTkFrame(self, fg_color=C["bg_header"], corner_radius=0, height=40)
+        header.grid(row=0, column=0, sticky="ew")
         header.grid_propagate(False)
         header.grid_columnconfigure(1, weight=1)
 
         # Logo + Nome
         logo_frame = ctk.CTkFrame(header, fg_color="transparent")
-        logo_frame.grid(row=0, column=0, padx=16, pady=8, sticky="w")
+        logo_frame.grid(row=0, column=0, padx=12, pady=6, sticky="w")
 
         ctk.CTkLabel(
             logo_frame, text="LA",
-            font=ctk.CTkFont(family="Consolas", size=18, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
             text_color=C["cyan"], fg_color=C["purple_dark"],
-            corner_radius=6, width=36, height=36,
-        ).pack(side="left", padx=(0, 10))
+            corner_radius=4, width=28, height=28,
+        ).pack(side="left", padx=(0, 8))
 
         ctk.CTkLabel(
             logo_frame, text="LOBO ALPHA V3.1",
-            font=ctk.CTkFont(family="Consolas", size=16, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
             text_color=C["cyan"],
         ).pack(side="left")
 
         ctk.CTkLabel(
             logo_frame, text="PERFORMANCE EXTREME",
-            font=ctk.CTkFont(family="Consolas", size=11),
+            font=ctk.CTkFont(family="Consolas", size=9),
             text_color=C["purple_light"],
-        ).pack(side="left", padx=(8, 0))
+        ).pack(side="left", padx=(6, 0))
 
         # Status admin
         status_text = "ADMIN" if self.admin_ok else "USER"
         status_color = C["success"] if self.admin_ok else C["warning"]
         ctk.CTkLabel(
-            header, text=f"  {status_text}  ",
-            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
+            header, text=f" {status_text} ",
+            font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
             text_color=status_color,
             fg_color=C["bg_card"],
-            corner_radius=4,
-        ).grid(row=0, column=2, padx=16, pady=8, sticky="e")
+            corner_radius=3,
+        ).grid(row=0, column=2, padx=12, pady=6, sticky="e")
 
     # ============================================================
-    # SIDEBAR ESQUERDA (Categorias)
+    # ABAS SUPERIORES
     # ============================================================
 
-    def _build_sidebar(self):
-        self.sidebar = ctk.CTkFrame(
-            self, fg_color=C["bg_sidebar"], corner_radius=0, width=200,
-            border_width=0,
-        )
-        self.sidebar.grid(row=1, column=0, sticky="nsew")
-        self.sidebar.grid_propagate(False)
+    def _build_tabs(self):
+        tabs_frame = ctk.CTkFrame(self, fg_color=C["bg_header"], corner_radius=0, height=32)
+        tabs_frame.grid(row=1, column=0, sticky="ew")
+        tabs_frame.grid_propagate(False)
 
-        # Titulo da sidebar
-        ctk.CTkLabel(
-            self.sidebar, text="CATEGORIAS",
-            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
-            text_color=C["text_dim"],
-        ).pack(anchor="w", padx=16, pady=(16, 8))
+        inner = ctk.CTkFrame(tabs_frame, fg_color="transparent")
+        inner.pack(fill="x", padx=8, pady=3)
 
-        # Separador
-        sep = ctk.CTkFrame(self.sidebar, fg_color=C["purple_dark"], height=1)
-        sep.pack(fill="x", padx=12, pady=(0, 8))
-
-        # Botoes de categoria
-        self.cat_buttons = {}
-        for cat in CATEGORIES:
+        self.tab_buttons = {}
+        for tab in TABS:
             btn = ctk.CTkButton(
-                self.sidebar,
-                text=f"  {cat['label']}",
-                font=ctk.CTkFont(family="Consolas", size=13),
-                fg_color="transparent",
-                hover_color=C["sb_hover"],
+                inner,
+                text=tab["label"],
+                font=ctk.CTkFont(family="Consolas", size=10),
+                fg_color=C["bg_tab"],
+                hover_color=C["bg_hover"],
                 text_color=C["text_sec"],
-                anchor="w",
-                height=38,
-                corner_radius=R,
-                border_width=0,
-                command=lambda k=cat["key"]: self._select_category(k),
+                height=24,
+                corner_radius=4,
+                border_width=1,
+                border_color=C["purple_dark"],
+                command=lambda k=tab["key"]: self._select_tab(k),
             )
-            btn.pack(fill="x", padx=8, pady=2)
-            self.cat_buttons[cat["key"]] = btn
+            btn.pack(side="left", padx=2, expand=True, fill="x")
+            self.tab_buttons[tab["key"]] = btn
 
-        # Spacer
-        spacer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        spacer.pack(fill="both", expand=True)
-
-        # Info do criador
-        ctk.CTkLabel(
-            self.sidebar, text="Bruno Lobo",
-            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
-            text_color=C["cyan_dim"],
-        ).pack(anchor="w", padx=16, pady=(0, 2))
-
-        ctk.CTkLabel(
-            self.sidebar, text="Analista de Sistemas",
-            font=ctk.CTkFont(family="Consolas", size=9),
-            text_color=C["text_dim"],
-        ).pack(anchor="w", padx=16, pady=(0, 4))
-
-        ctk.CTkLabel(
-            self.sidebar, text=f"v{APP_VERSION} // 2026",
-            font=ctk.CTkFont(family="Consolas", size=9),
-            text_color=C["text_dim"],
-        ).pack(anchor="w", padx=16, pady=(0, 16))
-
-    def _select_category(self, key):
-        self.current_category = key
-        # Atualizar visual dos botoes
-        for k, btn in self.cat_buttons.items():
+    def _select_tab(self, key):
+        self.current_tab = key
+        for k, btn in self.tab_buttons.items():
             if k == key:
                 btn.configure(
-                    fg_color=C["sb_active"],
+                    fg_color=C["bg_tab_sel"],
                     text_color=C["cyan"],
-                    border_width=1,
-                    border_color=C["purple"],
+                    border_color=C["cyan_dim"],
                 )
             else:
                 btn.configure(
-                    fg_color="transparent",
+                    fg_color=C["bg_tab"],
                     text_color=C["text_sec"],
-                    border_width=0,
+                    border_color=C["purple_dark"],
                 )
         self._populate_scripts(key)
 
     # ============================================================
-    # AREA CENTRAL (Lista de Scripts)
+    # CONTEUDO (Scripts + Botoes laterais)
     # ============================================================
 
-    def _build_scripts_area(self):
-        self.scripts_frame = ctk.CTkFrame(
-            self, fg_color=C["bg"], corner_radius=0,
-        )
-        self.scripts_frame.grid(row=1, column=1, sticky="nsew", padx=(1, 1))
-        self.scripts_frame.grid_rowconfigure(1, weight=1)
-        self.scripts_frame.grid_columnconfigure(0, weight=1)
+    def _build_content(self):
+        content = ctk.CTkFrame(self, fg_color=C["bg"], corner_radius=0)
+        content.grid(row=2, column=0, sticky="nsew")
+        content.grid_columnconfigure(0, weight=1)
+        content.grid_columnconfigure(1, weight=0)
+        content.grid_rowconfigure(0, weight=0)
+        content.grid_rowconfigure(1, weight=1)
 
-        # Header da area de scripts
-        scripts_header = ctk.CTkFrame(self.scripts_frame, fg_color=C["bg_card"], height=40, corner_radius=0)
-        scripts_header.grid(row=0, column=0, sticky="ew")
+        # Header de scripts (contagem + marcar/desmarcar)
+        scripts_header = ctk.CTkFrame(content, fg_color=C["bg_card"], height=30, corner_radius=0)
+        scripts_header.grid(row=0, column=0, columnspan=2, sticky="ew")
         scripts_header.grid_propagate(False)
         scripts_header.grid_columnconfigure(0, weight=1)
 
         self.scripts_count_label = ctk.CTkLabel(
             scripts_header, text="0 scripts disponiveis",
-            font=ctk.CTkFont(family="Consolas", size=11),
+            font=ctk.CTkFont(family="Consolas", size=10),
             text_color=C["text_sec"],
         )
-        self.scripts_count_label.grid(row=0, column=0, padx=12, sticky="w")
+        self.scripts_count_label.grid(row=0, column=0, padx=10, sticky="w")
 
-        # Botoes Marcar/Desmarcar
         btn_frame = ctk.CTkFrame(scripts_header, fg_color="transparent")
-        btn_frame.grid(row=0, column=1, padx=8, sticky="e")
+        btn_frame.grid(row=0, column=1, padx=6, sticky="e")
 
         ctk.CTkButton(
             btn_frame, text="Marcar Tudo",
-            font=ctk.CTkFont(family="Consolas", size=10),
+            font=ctk.CTkFont(family="Consolas", size=9),
             fg_color=C["cyan_dark"], hover_color=C["cyan_dim"],
-            text_color=C["bg"], width=90, height=26, corner_radius=4,
+            text_color=C["bg"], width=75, height=22, corner_radius=3,
             command=self._select_all,
         ).pack(side="left", padx=2)
 
         ctk.CTkButton(
             btn_frame, text="Desmarcar",
-            font=ctk.CTkFont(family="Consolas", size=10),
+            font=ctk.CTkFont(family="Consolas", size=9),
             fg_color=C["bg_hover"], hover_color=C["bg_card_alt"],
-            text_color=C["text_sec"], width=80, height=26, corner_radius=4,
+            text_color=C["text_sec"], width=65, height=22, corner_radius=3,
             command=self._deselect_all,
         ).pack(side="left", padx=2)
 
         # Scrollable area para scripts
         self.scripts_scroll = ctk.CTkScrollableFrame(
-            self.scripts_frame,
+            content,
             fg_color=C["bg"],
             scrollbar_button_color=C["purple_dark"],
             scrollbar_button_hover_color=C["purple_dim"],
         )
-        self.scripts_scroll.grid(row=1, column=0, sticky="nsew", padx=4, pady=4)
+        self.scripts_scroll.grid(row=1, column=0, sticky="nsew", padx=4, pady=2)
         self.scripts_scroll.grid_columnconfigure(0, weight=1)
 
+        # Painel lateral direito (botoes de acao rapida)
+        self.side_panel = ctk.CTkFrame(
+            content, fg_color=C["bg_header"], corner_radius=0, width=180,
+            border_width=1, border_color=C["purple_dark"],
+        )
+        self.side_panel.grid(row=1, column=1, sticky="nsew", padx=(0, 0))
+        self.side_panel.grid_propagate(False)
+
+        # Botao Aplicar Tweaks (grande)
+        self.apply_btn = ctk.CTkButton(
+            self.side_panel, text="APLICAR\nTWEAKS",
+            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            fg_color=C["btn_apply"], hover_color=C["btn_apply_h"],
+            text_color=C["bg"],
+            height=70, corner_radius=R,
+            command=self._apply_tweaks,
+        )
+        self.apply_btn.pack(fill="x", padx=8, pady=(12, 4))
+
+        self.selected_label = ctk.CTkLabel(
+            self.side_panel, text="0 selecionados",
+            font=ctk.CTkFont(family="Consolas", size=9),
+            text_color=C["text_dim"],
+        )
+        self.selected_label.pack(pady=(0, 8))
+
+        # Botao Restore Point
+        self.restore_btn = ctk.CTkButton(
+            self.side_panel, text="RESTORE\nPOINT",
+            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
+            fg_color=C["btn_restore"], hover_color=C["btn_restore_h"],
+            text_color="#FFFFFF",
+            height=55, corner_radius=R,
+            command=self._create_restore_point,
+        )
+        self.restore_btn.pack(fill="x", padx=8, pady=4)
+
+        # Botao Aplicar Tudo
+        self.all_btn = ctk.CTkButton(
+            self.side_panel, text="APLICAR\nTUDO",
+            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
+            fg_color=C["btn_all"], hover_color=C["btn_all_h"],
+            text_color="#FFFFFF",
+            height=55, corner_radius=R,
+            command=self._apply_all,
+        )
+        self.all_btn.pack(fill="x", padx=8, pady=4)
+
+        # Botao Parar
+        self.stop_btn = ctk.CTkButton(
+            self.side_panel, text="PARAR",
+            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
+            fg_color=C["btn_stop"], hover_color=C["btn_stop_h"],
+            text_color="#FFFFFF",
+            height=40, corner_radius=R,
+            state="disabled",
+            command=self._stop_execution,
+        )
+        self.stop_btn.pack(fill="x", padx=8, pady=4)
+
+        # Spacer
+        spacer = ctk.CTkFrame(self.side_panel, fg_color="transparent")
+        spacer.pack(fill="both", expand=True)
+
+        # Info
+        ctk.CTkLabel(
+            self.side_panel, text="LOBO TECH",
+            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
+            text_color=C["purple_light"],
+        ).pack(pady=(0, 2))
+
+        ctk.CTkLabel(
+            self.side_panel, text=f"v{APP_VERSION} // PREMIUM",
+            font=ctk.CTkFont(family="Consolas", size=8),
+            text_color=C["text_dim"],
+        ).pack(pady=(0, 8))
+
     def _populate_scripts(self, category):
-        # Limpar area
         for widget in self.scripts_scroll.winfo_children():
             widget.destroy()
 
@@ -468,20 +508,18 @@ class LoboAlphaApp(ctk.CTk):
 
         self.scripts_count_label.configure(text=f"{len(scripts)} scripts disponiveis")
 
-        # Criar checkboxes se nao existem
         if category not in self.checkboxes:
             self.checkboxes[category] = []
             for name, sfile in scripts:
                 var = ctk.BooleanVar(value=False)
                 self.checkboxes[category].append((var, path, sfile, name))
 
-        # Renderizar
         for i, (var, mp, sf, name) in enumerate(self.checkboxes[category]):
             row_bg = C["bg_card"] if i % 2 == 0 else C["bg"]
 
             row = ctk.CTkFrame(
                 self.scripts_scroll, fg_color=row_bg,
-                corner_radius=4, height=34,
+                corner_radius=3, height=28,
             )
             row.pack(fill="x", pady=1, padx=2)
             row.pack_propagate(False)
@@ -490,44 +528,50 @@ class LoboAlphaApp(ctk.CTk):
             cb = ctk.CTkCheckBox(
                 row, text="",
                 variable=var,
-                width=20, height=20,
-                checkbox_width=18, checkbox_height=18,
-                corner_radius=4,
+                width=16, height=16,
+                checkbox_width=14, checkbox_height=14,
+                corner_radius=3,
                 fg_color=C["cyan"],
                 hover_color=C["cyan_dim"],
                 border_color=C["purple_dim"],
-                border_width=2,
+                border_width=1,
+                command=self._update_selected_count,
             )
-            cb.grid(row=0, column=0, padx=(8, 6), pady=7)
+            cb.grid(row=0, column=0, padx=(6, 4), pady=5)
 
             ctk.CTkLabel(
                 row, text=name,
-                font=ctk.CTkFont(family="Consolas", size=12),
+                font=ctk.CTkFont(family="Consolas", size=11),
                 text_color=C["text"],
                 anchor="w",
             ).grid(row=0, column=1, sticky="w")
 
             ctk.CTkLabel(
                 row, text=sf,
-                font=ctk.CTkFont(family="Consolas", size=10),
+                font=ctk.CTkFont(family="Consolas", size=9),
                 text_color=C["text_dim"],
                 anchor="e",
-            ).grid(row=0, column=2, padx=(4, 10), sticky="e")
+            ).grid(row=0, column=2, padx=(4, 8), sticky="e")
+
+    def _update_selected_count(self):
+        count = len(self._get_selected())
+        self.selected_label.configure(text=f"{count} selecionados")
 
     def _select_all(self):
-        cat = self.current_category
+        cat = self.current_tab
         if cat in self.checkboxes:
             for var, _, _, _ in self.checkboxes[cat]:
                 var.set(True)
+        self._update_selected_count()
 
     def _deselect_all(self):
-        cat = self.current_category
+        cat = self.current_tab
         if cat in self.checkboxes:
             for var, _, _, _ in self.checkboxes[cat]:
                 var.set(False)
+        self._update_selected_count()
 
     def _get_selected(self):
-        """Retorna lista de (module_path, script_file) selecionados em TODAS as categorias."""
         sel = []
         for cat, items in self.checkboxes.items():
             for var, mp, sf, name in items:
@@ -536,7 +580,6 @@ class LoboAlphaApp(ctk.CTk):
         return sel
 
     def _get_all_scripts(self):
-        """Retorna TODOS os scripts de todas as categorias."""
         all_scripts = []
         for cat_key, mod in MODULES.items():
             for name, sf in mod["scripts"]:
@@ -544,74 +587,77 @@ class LoboAlphaApp(ctk.CTk):
         return all_scripts
 
     # ============================================================
-    # TERMINAL LATERAL DIREITO
+    # BARRA DE PROGRESSO
     # ============================================================
 
-    def _build_terminal(self):
-        self.terminal_frame = ctk.CTkFrame(
-            self, fg_color=C["bg_terminal"], corner_radius=0, width=340,
-            border_width=1, border_color=C["purple_dark"],
-        )
-        self.terminal_frame.grid(row=1, column=2, sticky="nsew")
-        self.terminal_frame.grid_propagate(False)
-        self.terminal_frame.grid_rowconfigure(1, weight=1)
-        self.terminal_frame.grid_columnconfigure(0, weight=1)
-
-        # Header do terminal
-        term_header = ctk.CTkFrame(self.terminal_frame, fg_color=C["bg_card"], height=32, corner_radius=0)
-        term_header.grid(row=0, column=0, sticky="ew")
-        term_header.grid_propagate(False)
-
-        ctk.CTkLabel(
-            term_header, text="  TERMINAL DE EXECUCAO",
-            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
-            text_color=C["cyan"],
-        ).pack(side="left", padx=8, pady=4)
-
-        # Barra de progresso
-        self.progress_frame = ctk.CTkFrame(self.terminal_frame, fg_color=C["bg_card"], height=28, corner_radius=0)
-        self.progress_frame.grid(row=0, column=0, sticky="ew", pady=(32, 0))
-        self.progress_frame.grid_propagate(False)
-        self.progress_frame.grid_columnconfigure(1, weight=1)
+    def _build_progress(self):
+        prog_frame = ctk.CTkFrame(self, fg_color=C["bg_card"], corner_radius=0, height=24)
+        prog_frame.grid(row=3, column=0, sticky="ew")
+        prog_frame.grid_propagate(False)
+        prog_frame.grid_columnconfigure(1, weight=1)
 
         self.progress_label = ctk.CTkLabel(
-            self.progress_frame, text="Aguardando...",
+            prog_frame, text="Aguardando...",
             font=ctk.CTkFont(family="Consolas", size=9),
             text_color=C["text_sec"],
         )
         self.progress_label.grid(row=0, column=0, padx=8, sticky="w")
 
         self.progress_bar = ctk.CTkProgressBar(
-            self.progress_frame,
+            prog_frame,
             fg_color=C["bg_input"],
             progress_color=C["cyan"],
-            height=10, corner_radius=5,
+            height=8, corner_radius=4,
         )
-        self.progress_bar.grid(row=0, column=1, padx=4, sticky="ew")
+        self.progress_bar.grid(row=0, column=1, padx=4, sticky="ew", pady=8)
         self.progress_bar.set(0)
 
         self.progress_pct = ctk.CTkLabel(
-            self.progress_frame, text="0%",
+            prog_frame, text="0%",
             font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
             text_color=C["cyan"],
-            width=36,
+            width=32,
         )
         self.progress_pct.grid(row=0, column=2, padx=4)
 
-        # Console de log
+    # ============================================================
+    # TERMINAL DE EXECUCAO (embaixo)
+    # ============================================================
+
+    def _build_terminal(self):
+        term_container = ctk.CTkFrame(
+            self, fg_color=C["bg_terminal"], corner_radius=0,
+            border_width=1, border_color=C["purple_dark"],
+        )
+        term_container.grid(row=4, column=0, sticky="nsew", padx=4, pady=(2, 0))
+        term_container.grid_rowconfigure(1, weight=1)
+        term_container.grid_columnconfigure(0, weight=1)
+
+        # Header do terminal
+        term_header = ctk.CTkFrame(term_container, fg_color=C["bg_card"], height=22, corner_radius=0)
+        term_header.grid(row=0, column=0, sticky="ew")
+        term_header.grid_propagate(False)
+
+        ctk.CTkLabel(
+            term_header, text="  TERMINAL DE EXECUCAO",
+            font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
+            text_color=C["cyan"],
+        ).pack(side="left", padx=6, pady=2)
+
+        # Console
         self.console = ctk.CTkTextbox(
-            self.terminal_frame,
+            term_container,
             fg_color=C["bg_terminal"],
             text_color=C["cyan"],
-            font=ctk.CTkFont(family="Consolas", size=10),
+            font=ctk.CTkFont(family="Consolas", size=9),
             corner_radius=0,
             border_width=0,
             wrap="word",
             state="disabled",
         )
-        self.console.grid(row=1, column=0, sticky="nsew", padx=4, pady=4)
+        self.console.grid(row=1, column=0, sticky="nsew", padx=4, pady=2)
 
-        # Configurar tags de cor
+        # Tags de cor
         self.console.configure(state="normal")
         self.console._textbox.tag_configure("ok", foreground=C["success"])
         self.console._textbox.tag_configure("warn", foreground=C["warning"])
@@ -621,73 +667,69 @@ class LoboAlphaApp(ctk.CTk):
         self.console.configure(state="disabled")
 
     # ============================================================
-    # BARRA INFERIOR (Botoes de Acao)
+    # BARRA INFERIOR (4 botoes de acao)
     # ============================================================
 
-    def _build_bottom_bar(self):
-        bottom = ctk.CTkFrame(
-            self, fg_color=C["bg_sidebar"], corner_radius=0, height=64,
+    def _build_action_bar(self):
+        bar = ctk.CTkFrame(
+            self, fg_color=C["bg_header"], corner_radius=0, height=50,
             border_width=1, border_color=C["purple_dark"],
         )
-        bottom.grid(row=2, column=0, columnspan=3, sticky="sew")
-        bottom.grid_propagate(False)
-        bottom.grid_columnconfigure(4, weight=1)
+        bar.grid(row=5, column=0, sticky="sew")
+        bar.grid_propagate(False)
+        bar.grid_columnconfigure(4, weight=1)
 
         # Botao Restore Point
-        self.restore_btn = ctk.CTkButton(
-            bottom, text="  Ponto de Restauracao",
-            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
+        ctk.CTkButton(
+            bar, text="Ponto de Restauracao",
+            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
             fg_color=C["btn_restore"], hover_color=C["btn_restore_h"],
             text_color="#FFFFFF",
-            height=42, corner_radius=R, width=210,
+            height=34, corner_radius=R, width=170,
             command=self._create_restore_point,
-        )
-        self.restore_btn.grid(row=0, column=0, padx=(16, 6), pady=11)
+        ).grid(row=0, column=0, padx=(10, 4), pady=8)
 
         # Botao Aplicar Selecionados
-        self.apply_btn = ctk.CTkButton(
-            bottom, text="  Aplicar Selecionados",
-            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
+        ctk.CTkButton(
+            bar, text="Aplicar Selecionados",
+            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
             fg_color=C["btn_apply"], hover_color=C["btn_apply_h"],
             text_color=C["bg"],
-            height=42, corner_radius=R, width=210,
+            height=34, corner_radius=R, width=170,
             command=self._apply_tweaks,
-        )
-        self.apply_btn.grid(row=0, column=1, padx=6, pady=11)
+        ).grid(row=0, column=1, padx=4, pady=8)
 
         # Botao Aplicar Tudo
-        self.all_btn = ctk.CTkButton(
-            bottom, text="  Aplicar Tudo",
-            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
+        ctk.CTkButton(
+            bar, text="Aplicar Tudo",
+            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
             fg_color=C["btn_all"], hover_color=C["btn_all_h"],
             text_color="#FFFFFF",
-            height=42, corner_radius=R, width=170,
+            height=34, corner_radius=R, width=130,
             command=self._apply_all,
-        )
-        self.all_btn.grid(row=0, column=2, padx=6, pady=11)
+        ).grid(row=0, column=2, padx=4, pady=8)
 
         # Botao Parar
-        self.stop_btn = ctk.CTkButton(
-            bottom, text="  PARAR",
-            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
+        self.stop_btn_bar = ctk.CTkButton(
+            bar, text="PARAR",
+            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
             fg_color=C["btn_stop"], hover_color=C["btn_stop_h"],
             text_color="#FFFFFF",
-            height=42, corner_radius=R, width=130,
+            height=34, corner_radius=R, width=100,
             state="disabled",
             command=self._stop_execution,
         )
-        self.stop_btn.grid(row=0, column=3, padx=6, pady=11)
+        self.stop_btn_bar.grid(row=0, column=3, padx=4, pady=8)
 
         # Spacer
-        spacer = ctk.CTkFrame(bottom, fg_color="transparent")
-        spacer.grid(row=0, column=4, sticky="ew")
+        ctk.CTkFrame(bar, fg_color="transparent").grid(row=0, column=4, sticky="ew")
 
         # Info
         ctk.CTkLabel(
-            bottom, text=f"(c) 2026 Bruno Lobo  |  {APP_NAME}  |  github.com/lobaotech",
-            font=ctk.CTkFont(family="Consolas", size=9),
+            bar, text=f"(c) 2026 Bruno Lobo  |  {APP_NAME}  |  github.com/lobaotech",
+            font=ctk.CTkFont(family="Consolas", size=8),
             text_color=C["text_dim"],
-        ).grid(row=0, column=5, padx=12, sticky="e")
+        ).grid(row=0, column=5, padx=10, sticky="e")
 
     # ============================================================
     # LOGGING
@@ -720,7 +762,6 @@ class LoboAlphaApp(ctk.CTk):
     # ============================================================
 
     def _download_script(self, module_path, script_file):
-        """Baixa um script e salva em cache local."""
         cache_dir = os.path.join(tempfile.gettempdir(), "lobo_cache")
         os.makedirs(cache_dir, exist_ok=True)
         temp_file = os.path.join(cache_dir, f"{module_path.replace('/', '_')}_{script_file}")
@@ -743,7 +784,6 @@ class LoboAlphaApp(ctk.CTk):
             return None
 
     def _batch_download(self, scripts_list):
-        """Baixa todos os scripts em paralelo (ate 10 ao mesmo tempo)."""
         self._log(f"Baixando {len(scripts_list)} scripts em paralelo...")
         results = {}
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
@@ -762,14 +802,13 @@ class LoboAlphaApp(ctk.CTk):
                 if path:
                     self._log_ok(f"Download: {sf}")
                 else:
-                    self._log_err(f"Falha: {sf}")
+                    self._log_err(f"Falha download: {sf}")
                 dl_pct = done_count / len(scripts_list) * 0.25
                 self.progress_bar.set(dl_pct)
                 self.progress_pct.configure(text=f"{int(dl_pct*100)}%")
         return results
 
     def _run_script(self, temp_file, script_file):
-        """Executa um script com output em tempo real. Timeout 15s."""
         suffix = os.path.splitext(script_file)[1].lower()
 
         if suffix in (".bat", ".cmd"):
@@ -845,18 +884,19 @@ class LoboAlphaApp(ctk.CTk):
         self.is_running = running
         if running:
             self.cancel_flag = False
-            self.apply_btn.configure(state="disabled", text="  EXECUTANDO...")
+            self.apply_btn.configure(state="disabled", text="EXECUTANDO...")
             self.all_btn.configure(state="disabled")
             self.restore_btn.configure(state="disabled")
             self.stop_btn.configure(state="normal")
+            self.stop_btn_bar.configure(state="normal")
         else:
-            self.apply_btn.configure(state="normal", text="  Aplicar Selecionados")
+            self.apply_btn.configure(state="normal", text="APLICAR\nTWEAKS")
             self.all_btn.configure(state="normal")
             self.restore_btn.configure(state="normal")
             self.stop_btn.configure(state="disabled")
+            self.stop_btn_bar.configure(state="disabled")
 
     def _stop_execution(self):
-        """Para a execucao imediatamente."""
         self.cancel_flag = True
         if self.current_process:
             try:
@@ -866,7 +906,6 @@ class LoboAlphaApp(ctk.CTk):
         self._log_warn("EXECUCAO CANCELADA PELO USUARIO!")
 
     def _execute_scripts(self, scripts_list):
-        """Worker thread para executar scripts."""
         start = time.time()
         total = len(scripts_list)
 
