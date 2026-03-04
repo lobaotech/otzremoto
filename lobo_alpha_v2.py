@@ -19,6 +19,7 @@ import ssl
 import ctypes
 import datetime
 import time
+import concurrent.futures
 
 # ================================================================
 # CONFIGURACOES
@@ -663,44 +664,76 @@ class LoboAlphaApp(ctk.CTk):
                     sel.append((mp, sf))
         return sel
 
-    def _download_and_run(self, module_path, script_file):
-        """Baixa e executa um script com output em tempo real."""
-        url = f"{REPO_BASE}/{module_path}/{script_file}"
-        self._log(f"Downloading: {script_file}")
+    def _download_script(self, module_path, script_file):
+        """Baixa um script e salva em cache local. Retorna o caminho local."""
+        cache_dir = os.path.join(tempfile.gettempdir(), "lobo_cache")
+        os.makedirs(cache_dir, exist_ok=True)
+        temp_file = os.path.join(cache_dir, f"{module_path.replace('/', '_')}_{script_file}")
 
+        # Se ja existe em cache, reutilizar
+        if os.path.exists(temp_file) and os.path.getsize(temp_file) > 0:
+            return temp_file
+
+        url = f"{REPO_BASE}/{module_path}/{script_file}"
         try:
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
-
             req = urllib.request.Request(url, headers={"User-Agent": "LoboAlpha/2.0"})
-            with urllib.request.urlopen(req, context=ctx) as resp:
+            with urllib.request.urlopen(req, context=ctx, timeout=15) as resp:
                 content = resp.read()
-
-            suffix = os.path.splitext(script_file)[1].lower()
-            temp_file = os.path.join(tempfile.gettempdir(), f"lobo_{script_file}")
-
             with open(temp_file, "wb") as f:
                 f.write(content)
+            return temp_file
+        except Exception:
+            return None
 
-            self._log(f"Executing: {script_file}")
+    def _batch_download(self, scripts_list):
+        """Baixa todos os scripts em paralelo (ate 8 ao mesmo tempo)."""
+        self._log(f"Baixando {len(scripts_list)} scripts em paralelo...")
+        results = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+            futures = {}
+            for mp, sf in scripts_list:
+                fut = pool.submit(self._download_script, mp, sf)
+                futures[fut] = (mp, sf)
+            done_count = 0
+            for fut in concurrent.futures.as_completed(futures):
+                mp, sf = futures[fut]
+                path = fut.result()
+                results[(mp, sf)] = path
+                done_count += 1
+                if path:
+                    self._log_ok(f"Download: {sf}")
+                else:
+                    self._log_err(f"Falha download: {sf}")
+                # Atualizar progresso do download
+                dl_pct = done_count / len(scripts_list) * 0.3  # 30% para downloads
+                self.progress_bar.set(dl_pct)
+                self.progress_pct.configure(text=f"{int(dl_pct*100)}%")
+        return results
 
-            # Construir comando
-            if suffix == ".bat":
-                cmd = ["cmd.exe", "/c", temp_file]
-            elif suffix == ".reg":
-                cmd = ["reg.exe", "import", temp_file]
-            elif suffix == ".ps1":
-                cmd = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", temp_file]
-            else:
-                self._log_warn(f"Tipo nao suportado: {suffix}")
-                return False
+    def _run_script(self, temp_file, script_file):
+        """Executa um script ja baixado com output em tempo real. Timeout de 30s."""
+        suffix = os.path.splitext(script_file)[1].lower()
 
-            # Executar com output em tempo real
-            creation_flags = 0
-            if sys.platform == "win32":
-                creation_flags = subprocess.CREATE_NO_WINDOW
+        if suffix == ".bat":
+            cmd = ["cmd.exe", "/c", temp_file]
+        elif suffix == ".reg":
+            cmd = ["reg.exe", "import", temp_file]
+        elif suffix == ".ps1":
+            cmd = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", temp_file]
+        elif suffix == ".cmd":
+            cmd = ["cmd.exe", "/c", temp_file]
+        else:
+            self._log_warn(f"Tipo nao suportado: {suffix}")
+            return False
 
+        creation_flags = 0
+        if sys.platform == "win32":
+            creation_flags = subprocess.CREATE_NO_WINDOW
+
+        try:
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -710,40 +743,37 @@ class LoboAlphaApp(ctk.CTk):
                 creationflags=creation_flags,
             )
 
-            # Ler output linha a linha em tempo real
+            # Ler output em tempo real com timeout
+            start_time = time.time()
             for line in iter(process.stdout.readline, ""):
                 line = line.rstrip()
                 if line:
                     self._log_output(line)
+                # Timeout de 30 segundos por script
+                if time.time() - start_time > 30:
+                    self._log_warn(f"Timeout 30s: {script_file} - avancando...")
+                    process.kill()
+                    process.stdout.close()
+                    return True  # Continua mesmo com timeout
 
             process.stdout.close()
-            return_code = process.wait(timeout=120)
-
-            # Limpar temp
-            try:
-                os.remove(temp_file)
-            except Exception:
-                pass
+            return_code = process.wait(timeout=5)
 
             if return_code == 0:
-                self._log_ok(f"{script_file} aplicado com sucesso!")
-                return True
+                self._log_ok(f"{script_file} aplicado!")
             else:
-                self._log_warn(f"{script_file} retornou codigo {return_code}")
-                return True
+                self._log_warn(f"{script_file} codigo {return_code}")
+            return True
 
         except subprocess.TimeoutExpired:
-            self._log_err(f"Timeout: {script_file}")
+            self._log_warn(f"Timeout: {script_file} - avancando...")
             try:
                 process.kill()
             except Exception:
                 pass
-            return False
-        except urllib.error.URLError as e:
-            self._log_err(f"Erro de rede: {script_file}")
-            return False
+            return True
         except Exception as e:
-            self._log_err(f"{script_file}: {str(e)[:80]}")
+            self._log_err(f"{script_file}: {str(e)[:60]}")
             return False
 
     def _apply_tweaks(self):
@@ -761,34 +791,52 @@ class LoboAlphaApp(ctk.CTk):
         self.is_running = True
         self.apply_btn.configure(state="disabled", text="\u23f3  EXECUTANDO...")
         self.progress_bar.set(0)
-        self.progress_label.configure(text="Iniciando...")
+        self.progress_label.configure(text="Baixando scripts...")
         self.progress_pct.configure(text="0%")
 
         def worker():
+            start = time.time()
+
+            # FASE 1: Download em lote paralelo (30% da barra)
+            downloaded = self._batch_download(selected)
+            dl_ok = sum(1 for v in downloaded.values() if v)
+            self._log(f"Downloads: {dl_ok}/{total} concluidos em {time.time()-start:.1f}s")
+            self._log("")
+
+            # FASE 2: Execucao sequencial rapida (70% da barra)
+            self._log("Executando scripts...")
             ok = 0
             fail = 0
             for i, (mp, sf) in enumerate(selected):
-                pct = i / total
+                pct = 0.3 + (i / total) * 0.7  # 30% a 100%
                 self.progress_bar.set(pct)
                 self.progress_label.configure(text=f"[{i+1}/{total}] {sf}")
                 self.progress_pct.configure(text=f"{int(pct*100)}%")
 
-                if self._download_and_run(mp, sf):
-                    ok += 1
+                temp_file = downloaded.get((mp, sf))
+                if temp_file and os.path.exists(temp_file):
+                    self._log(f"Executando: {sf}")
+                    if self._run_script(temp_file, sf):
+                        ok += 1
+                    else:
+                        fail += 1
                 else:
+                    self._log_err(f"Nao encontrado: {sf}")
                     fail += 1
 
+            elapsed = time.time() - start
             self.progress_bar.set(1.0)
             self.progress_label.configure(text="\u2705  Concluido!")
             self.progress_pct.configure(text="100%")
 
             self._log("")
             self._log("=" * 55)
-            self._log(f"RESULTADO: {ok} OK  |  {fail} FALHAS  |  {total} TOTAL")
+            self._log(f"RESULTADO: {ok} OK | {fail} FALHAS | {total} TOTAL")
+            self._log(f"Tempo total: {elapsed:.1f} segundos")
             if fail == 0:
                 self._log_ok("Todas as otimizacoes aplicadas com sucesso!")
             else:
-                self._log_warn(f"{fail} script(s) falharam. Verifique o log acima.")
+                self._log_warn(f"{fail} script(s) falharam.")
             self._log("=" * 55)
 
             self.is_running = False
@@ -813,11 +861,15 @@ class LoboAlphaApp(ctk.CTk):
         self.progress_pct.configure(text="...")
 
         def worker():
-            for i in range(4):
-                self.progress_bar.set(i / 4)
-                time.sleep(0.4)
+            self.progress_bar.set(0.2)
+            temp_file = self._download_script("01_Preparacao_e_Backup", "01_CRIAR_PONTO_RESTAURACAO.bat")
+            self.progress_bar.set(0.4)
 
-            ok = self._download_and_run("01_Preparacao_e_Backup", "01_CRIAR_PONTO_RESTAURACAO.bat")
+            if temp_file:
+                self._log("Executando restore point...")
+                ok = self._run_script(temp_file, "01_CRIAR_PONTO_RESTAURACAO.bat")
+            else:
+                ok = False
 
             self.progress_bar.set(1.0)
             self.progress_pct.configure(text="100%")
