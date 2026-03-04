@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 ================================================================
-  LOBO ALPHA V2.0 - PREMIUM EDITION
-  Toolkit de Otimizacao Windows - Cyberpunk Premium UI
-  (c) 2026 Lobo Tech - Todos os direitos reservados
+  LOBO ALPHA V3.1 - PERFORMANCE EXTREME
+  Toolkit de Otimizacao Windows - Premium Edition
+  Criador: Bruno Lobo 2026 - Analista de Sistemas
 ================================================================
 """
 
@@ -26,51 +25,70 @@ import concurrent.futures
 # ================================================================
 
 REPO_BASE = "https://raw.githubusercontent.com/lobaotech/otzremoto/main"
-APP_VERSION = "2.0.0"
+APP_VERSION = "3.1"
+APP_NAME = "Lobo Alpha V3.1 - Performance Extreme"
+CREATOR = "Bruno Lobo 2026 - Analista de Sistemas"
 
-# Paleta Premium Cyberpunk
+# Paleta Verde Ciano + Roxo com Degrade
 C = {
     # Fundos
-    "bg":           "#080810",
-    "bg_card":      "#10101c",
-    "bg_card_alt":  "#141422",
-    "bg_hover":     "#1a1a2e",
-    "bg_input":     "#0c0c18",
-    # Neon
-    "purple":       "#9933ff",
-    "purple_glow":  "#bb66ff",
-    "purple_dim":   "#6622aa",
-    "magenta":      "#ff00ff",
-    "magenta_dim":  "#cc00cc",
-    "cyan":         "#00ffcc",
-    "cyan_dim":     "#00cc99",
-    "pink":         "#ff2266",
-    "pink_dim":     "#cc1144",
-    "blue":         "#3366ff",
+    "bg":           "#0a0a12",
+    "bg_sidebar":   "#0d0d18",
+    "bg_card":      "#111120",
+    "bg_card_alt":  "#14142a",
+    "bg_hover":     "#1c1c35",
+    "bg_input":     "#0e0e1a",
+    "bg_terminal":  "#080810",
+    # Cores principais
+    "cyan":         "#00FFB2",
+    "cyan_light":   "#33FFCC",
+    "cyan_dim":     "#00CC8E",
+    "cyan_dark":    "#008866",
+    "purple":       "#9933FF",
+    "purple_light": "#BB66FF",
+    "purple_dim":   "#7722CC",
+    "purple_dark":  "#551199",
+    # Degrade (para referencia)
+    "grad_start":   "#00FFB2",
+    "grad_end":     "#9933FF",
     # Texto
-    "text":         "#e8e8f0",
-    "text_sec":     "#9999bb",
+    "text":         "#E8E8F0",
+    "text_sec":     "#9999BB",
     "text_dim":     "#555577",
     # Status
-    "success":      "#00ff88",
-    "warning":      "#ffbb33",
-    "error":        "#ff4455",
+    "success":      "#00FF88",
+    "warning":      "#FFBB33",
+    "error":        "#FF4455",
+    # Botoes
+    "btn_apply":    "#00CC8E",
+    "btn_apply_h":  "#00FFB2",
+    "btn_restore":  "#9933FF",
+    "btn_restore_h":"#BB66FF",
+    "btn_all":      "#7722CC",
+    "btn_all_h":    "#9933FF",
+    "btn_stop":     "#FF4455",
+    "btn_stop_h":   "#FF6677",
+    # Sidebar
+    "sb_active":    "#1a1a40",
+    "sb_hover":     "#151530",
+    "sb_border":    "#9933FF",
 }
 
-# Raio de arredondamento padrao
-R = 12
+R = 8  # Raio de arredondamento
 
 # ================================================================
 # MODULOS DE OTIMIZACAO
 # ================================================================
 
-TABS = [
-    ("PERFORMANCE", "\u26a1", C["cyan"]),
-    ("GAMING",      "\U0001f3ae", C["magenta"]),
-    ("NETWORK",     "\U0001f310", C["cyan"]),
-    ("INPUT LAG",   "\U0001f5b1\ufe0f", C["magenta"]),
-    ("CLEANUP",     "\U0001f9f9", C["cyan"]),
-    ("SYSTEM",      "\u2699\ufe0f", C["magenta"]),
+CATEGORIES = [
+    {"key": "PERFORMANCE", "icon": "P", "label": "Performance"},
+    {"key": "GAMING",      "icon": "G", "label": "Gaming"},
+    {"key": "NETWORK",     "icon": "N", "label": "Network"},
+    {"key": "INPUT_LAG",   "icon": "I", "label": "Input Lag"},
+    {"key": "CLEANUP",     "icon": "C", "label": "Cleanup"},
+    {"key": "SYSTEM",      "icon": "S", "label": "System"},
+    {"key": "GPU",         "icon": "V", "label": "GPU"},
+    {"key": "PRIVACY",     "icon": "L", "label": "Privacidade"},
 ]
 
 MODULES = {
@@ -119,7 +137,7 @@ MODULES = {
             ("Otimizacoes de Rede (Registro)", "otimizacoes_rede.reg"),
         ],
     },
-    "INPUT LAG": {
+    "INPUT_LAG": {
         "path": "05_Input_Lag_e_Perifericos",
         "scripts": [
             ("Buffers de Entrada", "01_buffers_entrada.bat"),
@@ -158,10 +176,27 @@ MODULES = {
             ("Desativar Windows Update", "07_desativar_windows_update.bat"),
             ("Resetar Cache de Update", "10_resetar_cache_update.bat"),
             ("Desativar Apps em Segundo Plano", "14_desativar_apps_segundo_plano.bat"),
-            ("GPU Hardware Scheduling", "05_agendamento_gpu_hardware.bat"),
-            ("Game DVR e Tela Cheia", "09_gamedvr_tela_cheia.bat"),
             ("DISM Restaurar Saude", "16_dism_restaurar_saude.bat"),
             ("SFC Scannow", "17_sfc_scannow.bat"),
+        ],
+    },
+    "GPU": {
+        "path": "03_GPU_e_Display",
+        "scripts": [
+            ("GPU Hardware Scheduling", "05_agendamento_gpu_hardware.bat"),
+            ("Game DVR e Tela Cheia", "09_gamedvr_tela_cheia.bat"),
+            ("Desativar Efeitos Visuais", "01_desativar_efeitos_visuais.bat"),
+            ("Otimizar NVIDIA", "02_otimizar_nvidia.bat"),
+            ("Otimizar AMD", "03_otimizar_amd.bat"),
+        ],
+    },
+    "PRIVACY": {
+        "path": "06_Privacidade_e_Telemetria",
+        "scripts": [
+            ("Desativar Telemetria", "01_desativar_telemetria.bat"),
+            ("Desativar Cortana Telemetria", "02_desativar_cortana_telemetria.bat"),
+            ("Desativar Rastreamento", "03_desativar_rastreamento.bat"),
+            ("Desativar Feedback", "04_desativar_feedback.bat"),
         ],
     },
 }
@@ -193,484 +228,503 @@ class LoboAlphaApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title(f"Lobo Alpha V{APP_VERSION} Premium")
-        self.geometry("1280x800")
-        self.minsize(1050, 680)
+        self.title(APP_NAME)
+        self.geometry("1360x820")
+        self.minsize(1100, 700)
         self.configure(fg_color=C["bg"])
 
-        self.checkboxes = {}
+        # Estado
         self.is_running = False
-        self.current_tab = "PERFORMANCE"
+        self.cancel_flag = False
+        self.current_process = None
+        self.current_category = "PERFORMANCE"
+        self.checkboxes = {}  # {category: [(var, module_path, script_file), ...]}
+
+        # Admin check
+        self.admin_ok = is_admin()
+
+        # Layout principal: 3 colunas
+        # [Sidebar Esquerda] [Area Central Scripts] [Terminal Direito]
+        self.grid_columnconfigure(0, weight=0, minsize=200)  # Sidebar
+        self.grid_columnconfigure(1, weight=1)                # Scripts
+        self.grid_columnconfigure(2, weight=0, minsize=340)   # Terminal
+        self.grid_rowconfigure(0, weight=0)   # Header
+        self.grid_rowconfigure(1, weight=1)   # Conteudo
+        self.grid_rowconfigure(2, weight=0)   # Barra inferior
 
         self._build_header()
-        self._build_tabs_bar()
-        self._build_body()
-        self._build_progress_section()
-        self._build_console()
-        self._build_footer()
+        self._build_sidebar()
+        self._build_scripts_area()
+        self._build_terminal()
+        self._build_bottom_bar()
 
-        self._log_system("Lobo Alpha V2.0 Premium initialized.")
-        self._log_system("System scan complete. No critical errors found.")
-        self._log_info("Ready to apply tweaks. Select options above.")
+        # Inicializar com primeira categoria
+        self._select_category("PERFORMANCE")
+
+        # Log inicial
+        self._log(f"{APP_NAME} inicializado.")
+        self._log(f"Criador: {CREATOR}")
+        if self.admin_ok:
+            self._log_ok("Executando como Administrador.")
+        else:
+            self._log_warn("SEM privilegios de administrador!")
+        self._log("Pronto. Selecione os tweaks e clique em Aplicar.")
 
     # ============================================================
     # HEADER
     # ============================================================
 
     def _build_header(self):
-        header = ctk.CTkFrame(
-            self, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["purple"], border_width=1
-        )
-        header.pack(fill="x", padx=12, pady=(10, 0))
+        header = ctk.CTkFrame(self, fg_color=C["bg_sidebar"], corner_radius=0, height=52)
+        header.grid(row=0, column=0, columnspan=3, sticky="ew")
+        header.grid_propagate(False)
+        header.grid_columnconfigure(1, weight=1)
 
-        inner = ctk.CTkFrame(header, fg_color="transparent")
-        inner.pack(fill="x", padx=20, pady=14)
-
-        # Esquerda: Logo + Titulo
-        left = ctk.CTkFrame(inner, fg_color="transparent")
-        left.pack(side="left")
+        # Logo + Nome
+        logo_frame = ctk.CTkFrame(header, fg_color="transparent")
+        logo_frame.grid(row=0, column=0, padx=16, pady=8, sticky="w")
 
         ctk.CTkLabel(
-            left,
-            text="\U0001f43a  LOBO ALPHA V2.0",
-            font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"),
+            logo_frame, text="LA",
+            font=ctk.CTkFont(family="Consolas", size=18, weight="bold"),
+            text_color=C["cyan"], fg_color=C["purple_dark"],
+            corner_radius=6, width=36, height=36,
+        ).pack(side="left", padx=(0, 10))
+
+        ctk.CTkLabel(
+            logo_frame, text="LOBO ALPHA V3.1",
+            font=ctk.CTkFont(family="Consolas", size=16, weight="bold"),
             text_color=C["cyan"],
         ).pack(side="left")
 
         ctk.CTkLabel(
-            left,
-            text="  //  DOMINE SEU HARDWARE",
-            font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"),
-            text_color=C["purple_glow"],
-        ).pack(side="left")
+            logo_frame, text="PERFORMANCE EXTREME",
+            font=ctk.CTkFont(family="Consolas", size=11),
+            text_color=C["purple_light"],
+        ).pack(side="left", padx=(8, 0))
 
-        # Direita: Status
-        right = ctk.CTkFrame(inner, fg_color="transparent")
-        right.pack(side="right")
-
-        admin_ok = is_admin()
-        status_frame = ctk.CTkFrame(
-            right, fg_color="#0a1a10" if admin_ok else "#1a0a0a",
-            corner_radius=8,
-            border_color=C["success"] if admin_ok else C["error"],
-            border_width=1,
-        )
-        status_frame.pack(side="right")
-
+        # Status admin
+        status_text = "ADMIN" if self.admin_ok else "USER"
+        status_color = C["success"] if self.admin_ok else C["warning"]
         ctk.CTkLabel(
-            status_frame,
-            text=("\u2705  ADMIN" if admin_ok else "\u26a0\ufe0f  SEM ADMIN"),
-            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-            text_color=C["success"] if admin_ok else C["error"],
-        ).pack(padx=12, pady=5)
+            header, text=f"  {status_text}  ",
+            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
+            text_color=status_color,
+            fg_color=C["bg_card"],
+            corner_radius=4,
+        ).grid(row=0, column=2, padx=16, pady=8, sticky="e")
 
     # ============================================================
-    # TABS BAR
+    # SIDEBAR ESQUERDA (Categorias)
     # ============================================================
 
-    def _build_tabs_bar(self):
-        bar = ctk.CTkFrame(self, fg_color="transparent")
-        bar.pack(fill="x", padx=12, pady=(8, 0))
+    def _build_sidebar(self):
+        self.sidebar = ctk.CTkFrame(
+            self, fg_color=C["bg_sidebar"], corner_radius=0, width=200,
+            border_width=0,
+        )
+        self.sidebar.grid(row=1, column=0, sticky="nsew")
+        self.sidebar.grid_propagate(False)
 
-        self.tab_buttons = {}
+        # Titulo da sidebar
+        ctk.CTkLabel(
+            self.sidebar, text="CATEGORIAS",
+            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
+            text_color=C["text_dim"],
+        ).pack(anchor="w", padx=16, pady=(16, 8))
 
-        for tab_name, icon, color in TABS:
-            is_active = (tab_name == self.current_tab)
+        # Separador
+        sep = ctk.CTkFrame(self.sidebar, fg_color=C["purple_dark"], height=1)
+        sep.pack(fill="x", padx=12, pady=(0, 8))
 
+        # Botoes de categoria
+        self.cat_buttons = {}
+        for cat in CATEGORIES:
             btn = ctk.CTkButton(
-                bar,
-                text=f"{icon}  {tab_name}",
-                font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
-                fg_color=color if is_active else C["bg_card"],
-                hover_color=C["bg_hover"],
-                text_color=C["bg"] if is_active else color,
+                self.sidebar,
+                text=f"  {cat['label']}",
+                font=ctk.CTkFont(family="Consolas", size=13),
+                fg_color="transparent",
+                hover_color=C["sb_hover"],
+                text_color=C["text_sec"],
+                anchor="w",
+                height=38,
                 corner_radius=R,
-                height=42,
-                border_color=color,
-                border_width=1 if not is_active else 0,
-                command=lambda tn=tab_name: self._switch_tab(tn),
+                border_width=0,
+                command=lambda k=cat["key"]: self._select_category(k),
             )
-            btn.pack(side="left", fill="x", expand=True, padx=3)
-            self.tab_buttons[tab_name] = (btn, color)
+            btn.pack(fill="x", padx=8, pady=2)
+            self.cat_buttons[cat["key"]] = btn
 
-    def _switch_tab(self, tab_name):
-        self.current_tab = tab_name
-        for tn, (btn, color) in self.tab_buttons.items():
-            if tn == tab_name:
-                btn.configure(fg_color=color, text_color=C["bg"], border_width=0)
-            else:
-                btn.configure(fg_color=C["bg_card"], text_color=color, border_width=1)
-        for tn, frame in self.tab_content.items():
-            if tn == tab_name:
-                frame.pack(fill="both", expand=True, padx=2, pady=2)
-            else:
-                frame.pack_forget()
+        # Spacer
+        spacer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        spacer.pack(fill="both", expand=True)
 
-    # ============================================================
-    # BODY
-    # ============================================================
-
-    def _build_body(self):
-        body = ctk.CTkFrame(self, fg_color="transparent")
-        body.pack(fill="both", expand=True, padx=12, pady=(6, 0))
-
-        # === ESQUERDA: Scripts ===
-        left = ctk.CTkFrame(
-            body, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["purple_dim"], border_width=1,
-        )
-        left.pack(side="left", fill="both", expand=True, padx=(0, 6))
-
-        self.tab_content = {}
-        for tab_name, module_data in MODULES.items():
-            scroll = ctk.CTkScrollableFrame(
-                left, fg_color="transparent",
-                scrollbar_button_color=C["purple"],
-                scrollbar_button_hover_color=C["magenta"],
-                corner_radius=0,
-            )
-            self.tab_content[tab_name] = scroll
-            self._build_script_list(scroll, tab_name, module_data)
-
-        self.tab_content[self.current_tab].pack(fill="both", expand=True, padx=2, pady=2)
-
-        # === DIREITA: Acoes ===
-        right = ctk.CTkFrame(body, fg_color="transparent", width=290)
-        right.pack(side="right", fill="y")
-        right.pack_propagate(False)
-        self._build_actions(right)
-
-    def _build_script_list(self, parent, module_name, module_data):
-        self.checkboxes[module_name] = {}
-
-        # Header com botoes
-        hdr = ctk.CTkFrame(parent, fg_color="transparent")
-        hdr.pack(fill="x", padx=8, pady=(8, 4))
+        # Info do criador
+        ctk.CTkLabel(
+            self.sidebar, text="Bruno Lobo",
+            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
+            text_color=C["cyan_dim"],
+        ).pack(anchor="w", padx=16, pady=(0, 2))
 
         ctk.CTkLabel(
-            hdr,
-            text=f"{len(module_data['scripts'])} scripts disponiveis",
-            font=ctk.CTkFont(family="Segoe UI", size=11),
+            self.sidebar, text="Analista de Sistemas",
+            font=ctk.CTkFont(family="Consolas", size=9),
+            text_color=C["text_dim"],
+        ).pack(anchor="w", padx=16, pady=(0, 4))
+
+        ctk.CTkLabel(
+            self.sidebar, text=f"v{APP_VERSION} // 2026",
+            font=ctk.CTkFont(family="Consolas", size=9),
+            text_color=C["text_dim"],
+        ).pack(anchor="w", padx=16, pady=(0, 16))
+
+    def _select_category(self, key):
+        self.current_category = key
+        # Atualizar visual dos botoes
+        for k, btn in self.cat_buttons.items():
+            if k == key:
+                btn.configure(
+                    fg_color=C["sb_active"],
+                    text_color=C["cyan"],
+                    border_width=1,
+                    border_color=C["purple"],
+                )
+            else:
+                btn.configure(
+                    fg_color="transparent",
+                    text_color=C["text_sec"],
+                    border_width=0,
+                )
+        self._populate_scripts(key)
+
+    # ============================================================
+    # AREA CENTRAL (Lista de Scripts)
+    # ============================================================
+
+    def _build_scripts_area(self):
+        self.scripts_frame = ctk.CTkFrame(
+            self, fg_color=C["bg"], corner_radius=0,
+        )
+        self.scripts_frame.grid(row=1, column=1, sticky="nsew", padx=(1, 1))
+        self.scripts_frame.grid_rowconfigure(1, weight=1)
+        self.scripts_frame.grid_columnconfigure(0, weight=1)
+
+        # Header da area de scripts
+        scripts_header = ctk.CTkFrame(self.scripts_frame, fg_color=C["bg_card"], height=40, corner_radius=0)
+        scripts_header.grid(row=0, column=0, sticky="ew")
+        scripts_header.grid_propagate(False)
+        scripts_header.grid_columnconfigure(0, weight=1)
+
+        self.scripts_count_label = ctk.CTkLabel(
+            scripts_header, text="0 scripts disponiveis",
+            font=ctk.CTkFont(family="Consolas", size=11),
             text_color=C["text_sec"],
-        ).pack(side="left")
+        )
+        self.scripts_count_label.grid(row=0, column=0, padx=12, sticky="w")
+
+        # Botoes Marcar/Desmarcar
+        btn_frame = ctk.CTkFrame(scripts_header, fg_color="transparent")
+        btn_frame.grid(row=0, column=1, padx=8, sticky="e")
 
         ctk.CTkButton(
-            hdr, text="Desmarcar",
-            font=ctk.CTkFont(size=11), width=80, height=26,
-            fg_color="transparent", hover_color=C["bg_hover"],
-            text_color=C["text_dim"], corner_radius=6,
-            command=lambda mn=module_name: self._select_all(mn, False),
-        ).pack(side="right", padx=(4, 0))
+            btn_frame, text="Marcar Tudo",
+            font=ctk.CTkFont(family="Consolas", size=10),
+            fg_color=C["cyan_dark"], hover_color=C["cyan_dim"],
+            text_color=C["bg"], width=90, height=26, corner_radius=4,
+            command=self._select_all,
+        ).pack(side="left", padx=2)
 
         ctk.CTkButton(
-            hdr, text="\u2714  Marcar Tudo",
-            font=ctk.CTkFont(size=11), width=100, height=26,
-            fg_color=C["purple_dim"], hover_color=C["purple"],
-            text_color=C["purple_glow"], corner_radius=6,
-            border_color=C["purple_dim"], border_width=1,
-            command=lambda mn=module_name: self._select_all(mn, True),
-        ).pack(side="right")
+            btn_frame, text="Desmarcar",
+            font=ctk.CTkFont(family="Consolas", size=10),
+            fg_color=C["bg_hover"], hover_color=C["bg_card_alt"],
+            text_color=C["text_sec"], width=80, height=26, corner_radius=4,
+            command=self._deselect_all,
+        ).pack(side="left", padx=2)
 
-        # Linha separadora
-        ctk.CTkFrame(parent, fg_color=C["purple_dim"], height=1, corner_radius=0).pack(fill="x", padx=8, pady=(2, 6))
+        # Scrollable area para scripts
+        self.scripts_scroll = ctk.CTkScrollableFrame(
+            self.scripts_frame,
+            fg_color=C["bg"],
+            scrollbar_button_color=C["purple_dark"],
+            scrollbar_button_hover_color=C["purple_dim"],
+        )
+        self.scripts_scroll.grid(row=1, column=0, sticky="nsew", padx=4, pady=4)
+        self.scripts_scroll.grid_columnconfigure(0, weight=1)
 
-        # Scripts
-        for display_name, script_file in module_data["scripts"]:
-            var = ctk.BooleanVar(value=False)
+    def _populate_scripts(self, category):
+        # Limpar area
+        for widget in self.scripts_scroll.winfo_children():
+            widget.destroy()
+
+        if category not in MODULES:
+            self.scripts_count_label.configure(text="Categoria nao disponivel")
+            return
+
+        mod = MODULES[category]
+        scripts = mod["scripts"]
+        path = mod["path"]
+
+        self.scripts_count_label.configure(text=f"{len(scripts)} scripts disponiveis")
+
+        # Criar checkboxes se nao existem
+        if category not in self.checkboxes:
+            self.checkboxes[category] = []
+            for name, sfile in scripts:
+                var = ctk.BooleanVar(value=False)
+                self.checkboxes[category].append((var, path, sfile, name))
+
+        # Renderizar
+        for i, (var, mp, sf, name) in enumerate(self.checkboxes[category]):
+            row_bg = C["bg_card"] if i % 2 == 0 else C["bg"]
 
             row = ctk.CTkFrame(
-                parent, fg_color=C["bg_card_alt"], corner_radius=8,
-                height=40,
+                self.scripts_scroll, fg_color=row_bg,
+                corner_radius=4, height=34,
             )
-            row.pack(fill="x", padx=8, pady=2)
+            row.pack(fill="x", pady=1, padx=2)
             row.pack_propagate(False)
+            row.grid_columnconfigure(1, weight=1)
 
             cb = ctk.CTkCheckBox(
                 row, text="",
-                variable=var, width=22, height=22,
-                fg_color=C["cyan"], hover_color=C["cyan_dim"],
+                variable=var,
+                width=20, height=20,
+                checkbox_width=18, checkbox_height=18,
+                corner_radius=4,
+                fg_color=C["cyan"],
+                hover_color=C["cyan_dim"],
                 border_color=C["purple_dim"],
-                checkmark_color=C["bg"], corner_radius=6,
                 border_width=2,
             )
-            cb.pack(side="left", padx=(10, 10), pady=8)
+            cb.grid(row=0, column=0, padx=(8, 6), pady=7)
 
-            # Nome legivel (principal)
             ctk.CTkLabel(
-                row,
-                text=display_name,
-                font=ctk.CTkFont(family="Segoe UI", size=13),
+                row, text=name,
+                font=ctk.CTkFont(family="Consolas", size=12),
                 text_color=C["text"],
                 anchor="w",
-            ).pack(side="left", fill="x", expand=True)
+            ).grid(row=0, column=1, sticky="w")
 
-            # Nome do ficheiro (secundario)
             ctk.CTkLabel(
-                row,
-                text=script_file,
+                row, text=sf,
                 font=ctk.CTkFont(family="Consolas", size=10),
                 text_color=C["text_dim"],
                 anchor="e",
-            ).pack(side="right", padx=10)
+            ).grid(row=0, column=2, padx=(4, 10), sticky="e")
 
-            self.checkboxes[module_name][script_file] = (var, cb)
+    def _select_all(self):
+        cat = self.current_category
+        if cat in self.checkboxes:
+            for var, _, _, _ in self.checkboxes[cat]:
+                var.set(True)
 
-    def _build_actions(self, parent):
-        # === APLICAR TWEAKS ===
-        apply_card = ctk.CTkFrame(
-            parent, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["magenta_dim"], border_width=1,
-        )
-        apply_card.pack(fill="x", pady=(0, 8))
-
-        self.apply_btn = ctk.CTkButton(
-            apply_card,
-            text="\u25b6  APLICAR TWEAKS",
-            font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"),
-            fg_color=C["magenta"],
-            hover_color=C["magenta_dim"],
-            text_color="white",
-            height=70, corner_radius=R,
-            command=self._apply_tweaks,
-        )
-        self.apply_btn.pack(fill="x", padx=10, pady=(10, 4))
-
-        self.selected_label = ctk.CTkLabel(
-            apply_card,
-            text="0 scripts selecionados",
-            font=ctk.CTkFont(family="Segoe UI", size=11),
-            text_color=C["text_dim"],
-        )
-        self.selected_label.pack(pady=(0, 10))
-
-        # === RESTORE POINT ===
-        restore_card = ctk.CTkFrame(
-            parent, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["pink_dim"], border_width=1,
-        )
-        restore_card.pack(fill="x", pady=(0, 8))
-
-        ctk.CTkButton(
-            restore_card,
-            text="\U0001f6e1\ufe0f  RESTORE POINT",
-            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
-            fg_color=C["pink"],
-            hover_color=C["pink_dim"],
-            text_color="white",
-            height=55, corner_radius=R,
-            command=self._create_restore_point,
-        ).pack(fill="x", padx=10, pady=10)
-
-        # === APLICAR TUDO ===
-        ctk.CTkButton(
-            parent,
-            text="\U0001f525  APLICAR TUDO",
-            font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"),
-            fg_color=C["purple_dim"],
-            hover_color=C["purple"],
-            text_color=C["text"],
-            height=48, corner_radius=R,
-            border_color=C["purple_dim"], border_width=1,
-            command=self._apply_all,
-        ).pack(fill="x", pady=(0, 10))
-
-        # === INFO ===
-        info_card = ctk.CTkFrame(
-            parent, fg_color=C["bg_card"], corner_radius=R,
-            border_color=C["text_dim"], border_width=1,
-        )
-        info_card.pack(fill="x", pady=(0, 8))
-
-        ctk.CTkLabel(
-            info_card,
-            text="\u2139\ufe0f  Os scripts sao baixados do\n    GitHub e executados localmente.\n    Nenhum arquivo permanece\n    no sistema apos a execucao.",
-            font=ctk.CTkFont(family="Segoe UI", size=11),
-            text_color=C["text_dim"],
-            justify="left",
-        ).pack(padx=14, pady=12)
-
-        # Branding
-        brand = ctk.CTkFrame(parent, fg_color="transparent")
-        brand.pack(side="bottom", fill="x", padx=10, pady=(0, 5))
-
-        ctk.CTkLabel(
-            brand,
-            text="\U0001f43a LOBO TECH",
-            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
-            text_color=C["purple"],
-        ).pack(anchor="e")
-
-        ctk.CTkLabel(
-            brand,
-            text=f"v{APP_VERSION} // PREMIUM",
-            font=ctk.CTkFont(family="Consolas", size=9),
-            text_color=C["text_dim"],
-        ).pack(anchor="e")
-
-        # Atualizar contador
-        self._update_count()
-
-    # ============================================================
-    # BARRA DE PROGRESSO
-    # ============================================================
-
-    def _build_progress_section(self):
-        pf = ctk.CTkFrame(self, fg_color=C["bg_card"], corner_radius=R, height=44,
-                           border_color=C["purple_dim"], border_width=1)
-        pf.pack(fill="x", padx=12, pady=(6, 0))
-        pf.pack_propagate(False)
-
-        inner = ctk.CTkFrame(pf, fg_color="transparent")
-        inner.pack(fill="both", expand=True, padx=14, pady=8)
-
-        self.progress_label = ctk.CTkLabel(
-            inner, text="Aguardando...",
-            font=ctk.CTkFont(family="Segoe UI", size=11),
-            text_color=C["text_sec"], anchor="w", width=220,
-        )
-        self.progress_label.pack(side="left")
-
-        self.progress_pct = ctk.CTkLabel(
-            inner, text="0%",
-            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
-            text_color=C["magenta"], width=50,
-        )
-        self.progress_pct.pack(side="right")
-
-        self.progress_bar = ctk.CTkProgressBar(
-            inner,
-            fg_color=C["bg_input"],
-            progress_color=C["magenta"],
-            height=14, corner_radius=7,
-        )
-        self.progress_bar.pack(side="left", fill="x", expand=True, padx=(10, 10))
-        self.progress_bar.set(0)
-
-    # ============================================================
-    # CONSOLE (LOG EM TEMPO REAL)
-    # ============================================================
-
-    def _build_console(self):
-        cf = ctk.CTkFrame(
-            self, fg_color=C["bg_card"], corner_radius=R, height=175,
-            border_color=C["cyan_dim"], border_width=1,
-        )
-        cf.pack(fill="x", padx=12, pady=(6, 0))
-        cf.pack_propagate(False)
-
-        # Label do console
-        top = ctk.CTkFrame(cf, fg_color="transparent")
-        top.pack(fill="x", padx=14, pady=(8, 2))
-
-        ctk.CTkLabel(
-            top, text="\U0001f4cb  TERMINAL DE EXECUCAO",
-            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-            text_color=C["cyan"],
-        ).pack(side="left")
-
-        self.console = ctk.CTkTextbox(
-            cf,
-            font=ctk.CTkFont(family="Consolas", size=11),
-            fg_color=C["bg"],
-            text_color=C["cyan"],
-            corner_radius=8,
-            wrap="word",
-            state="disabled",
-            activate_scrollbars=True,
-            scrollbar_button_color=C["purple"],
-        )
-        self.console.pack(fill="both", expand=True, padx=10, pady=(2, 10))
-
-    # ============================================================
-    # FOOTER
-    # ============================================================
-
-    def _build_footer(self):
-        ft = ctk.CTkFrame(self, fg_color="transparent", height=28)
-        ft.pack(fill="x", padx=16, pady=(4, 8))
-        ft.pack_propagate(False)
-
-        ctk.CTkLabel(
-            ft,
-            text=f"\u00a9 2026 Lobo Tech  |  Lobo Alpha V{APP_VERSION} Premium  |  github.com/lobaotech",
-            font=ctk.CTkFont(family="Segoe UI", size=10),
-            text_color=C["text_dim"],
-        ).pack(side="left")
-
-        ctk.CTkLabel(
-            ft,
-            text=datetime.datetime.now().strftime("%d/%m/%Y  %H:%M"),
-            font=ctk.CTkFont(family="Segoe UI", size=10),
-            text_color=C["text_dim"],
-        ).pack(side="right")
-
-    # ============================================================
-    # LOGGING (TEMPO REAL)
-    # ============================================================
-
-    def _log(self, msg, color=None):
-        """Adiciona mensagem ao console."""
-        ts = datetime.datetime.now().strftime("%H:%M:%S")
-        self.console.configure(state="normal")
-        self.console.insert("end", f"[{ts}] {msg}\n")
-        self.console.see("end")
-        self.console.configure(state="disabled")
-
-    def _log_system(self, msg):
-        self._log(msg)
-
-    def _log_info(self, msg):
-        self._log(msg)
-
-    def _log_ok(self, msg):
-        self._log(f"[OK] {msg}")
-
-    def _log_warn(self, msg):
-        self._log(f"[WARN] {msg}")
-
-    def _log_err(self, msg):
-        self._log(f"[ERROR] {msg}")
-
-    def _log_output(self, line):
-        """Log de saida em tempo real do script."""
-        self.console.configure(state="normal")
-        self.console.insert("end", f"    | {line}\n")
-        self.console.see("end")
-        self.console.configure(state="disabled")
-
-    # ============================================================
-    # LOGICA
-    # ============================================================
-
-    def _select_all(self, mn, state):
-        for sf, (var, cb) in self.checkboxes[mn].items():
-            var.set(state)
-
-    def _update_count(self):
-        total = sum(
-            1 for scripts in self.checkboxes.values()
-            for sf, (var, cb) in scripts.items() if var.get()
-        )
-        self.selected_label.configure(text=f"{total} scripts selecionados")
-        self.after(400, self._update_count)
+    def _deselect_all(self):
+        cat = self.current_category
+        if cat in self.checkboxes:
+            for var, _, _, _ in self.checkboxes[cat]:
+                var.set(False)
 
     def _get_selected(self):
+        """Retorna lista de (module_path, script_file) selecionados em TODAS as categorias."""
         sel = []
-        for mn, scripts in self.checkboxes.items():
-            mp = MODULES[mn]["path"]
-            for sf, (var, cb) in scripts.items():
+        for cat, items in self.checkboxes.items():
+            for var, mp, sf, name in items:
                 if var.get():
                     sel.append((mp, sf))
         return sel
 
+    def _get_all_scripts(self):
+        """Retorna TODOS os scripts de todas as categorias."""
+        all_scripts = []
+        for cat_key, mod in MODULES.items():
+            for name, sf in mod["scripts"]:
+                all_scripts.append((mod["path"], sf))
+        return all_scripts
+
+    # ============================================================
+    # TERMINAL LATERAL DIREITO
+    # ============================================================
+
+    def _build_terminal(self):
+        self.terminal_frame = ctk.CTkFrame(
+            self, fg_color=C["bg_terminal"], corner_radius=0, width=340,
+            border_width=1, border_color=C["purple_dark"],
+        )
+        self.terminal_frame.grid(row=1, column=2, sticky="nsew")
+        self.terminal_frame.grid_propagate(False)
+        self.terminal_frame.grid_rowconfigure(1, weight=1)
+        self.terminal_frame.grid_columnconfigure(0, weight=1)
+
+        # Header do terminal
+        term_header = ctk.CTkFrame(self.terminal_frame, fg_color=C["bg_card"], height=32, corner_radius=0)
+        term_header.grid(row=0, column=0, sticky="ew")
+        term_header.grid_propagate(False)
+
+        ctk.CTkLabel(
+            term_header, text="  TERMINAL DE EXECUCAO",
+            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
+            text_color=C["cyan"],
+        ).pack(side="left", padx=8, pady=4)
+
+        # Barra de progresso
+        self.progress_frame = ctk.CTkFrame(self.terminal_frame, fg_color=C["bg_card"], height=28, corner_radius=0)
+        self.progress_frame.grid(row=0, column=0, sticky="ew", pady=(32, 0))
+        self.progress_frame.grid_propagate(False)
+        self.progress_frame.grid_columnconfigure(1, weight=1)
+
+        self.progress_label = ctk.CTkLabel(
+            self.progress_frame, text="Aguardando...",
+            font=ctk.CTkFont(family="Consolas", size=9),
+            text_color=C["text_sec"],
+        )
+        self.progress_label.grid(row=0, column=0, padx=8, sticky="w")
+
+        self.progress_bar = ctk.CTkProgressBar(
+            self.progress_frame,
+            fg_color=C["bg_input"],
+            progress_color=C["cyan"],
+            height=10, corner_radius=5,
+        )
+        self.progress_bar.grid(row=0, column=1, padx=4, sticky="ew")
+        self.progress_bar.set(0)
+
+        self.progress_pct = ctk.CTkLabel(
+            self.progress_frame, text="0%",
+            font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
+            text_color=C["cyan"],
+            width=36,
+        )
+        self.progress_pct.grid(row=0, column=2, padx=4)
+
+        # Console de log
+        self.console = ctk.CTkTextbox(
+            self.terminal_frame,
+            fg_color=C["bg_terminal"],
+            text_color=C["cyan"],
+            font=ctk.CTkFont(family="Consolas", size=10),
+            corner_radius=0,
+            border_width=0,
+            wrap="word",
+            state="disabled",
+        )
+        self.console.grid(row=1, column=0, sticky="nsew", padx=4, pady=4)
+
+        # Configurar tags de cor
+        self.console.configure(state="normal")
+        self.console._textbox.tag_configure("ok", foreground=C["success"])
+        self.console._textbox.tag_configure("warn", foreground=C["warning"])
+        self.console._textbox.tag_configure("err", foreground=C["error"])
+        self.console._textbox.tag_configure("output", foreground="#88AACC")
+        self.console._textbox.tag_configure("dim", foreground=C["text_dim"])
+        self.console.configure(state="disabled")
+
+    # ============================================================
+    # BARRA INFERIOR (Botoes de Acao)
+    # ============================================================
+
+    def _build_bottom_bar(self):
+        bottom = ctk.CTkFrame(
+            self, fg_color=C["bg_sidebar"], corner_radius=0, height=56,
+            border_width=0,
+        )
+        bottom.grid(row=2, column=0, columnspan=3, sticky="ew")
+        bottom.grid_propagate(False)
+        bottom.grid_columnconfigure(4, weight=1)
+
+        # Botao Restore Point
+        self.restore_btn = ctk.CTkButton(
+            bottom, text="  Ponto de Restauracao",
+            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            fg_color=C["btn_restore"], hover_color=C["btn_restore_h"],
+            text_color="#FFFFFF",
+            height=38, corner_radius=R, width=200,
+            command=self._create_restore_point,
+        )
+        self.restore_btn.grid(row=0, column=0, padx=(12, 6), pady=9)
+
+        # Botao Aplicar Selecionados
+        self.apply_btn = ctk.CTkButton(
+            bottom, text="  Aplicar Selecionados",
+            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            fg_color=C["btn_apply"], hover_color=C["btn_apply_h"],
+            text_color=C["bg"],
+            height=38, corner_radius=R, width=200,
+            command=self._apply_tweaks,
+        )
+        self.apply_btn.grid(row=0, column=1, padx=6, pady=9)
+
+        # Botao Aplicar Tudo
+        self.all_btn = ctk.CTkButton(
+            bottom, text="  Aplicar Tudo",
+            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            fg_color=C["btn_all"], hover_color=C["btn_all_h"],
+            text_color="#FFFFFF",
+            height=38, corner_radius=R, width=160,
+            command=self._apply_all,
+        )
+        self.all_btn.grid(row=0, column=2, padx=6, pady=9)
+
+        # Botao Parar
+        self.stop_btn = ctk.CTkButton(
+            bottom, text="  PARAR",
+            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
+            fg_color=C["btn_stop"], hover_color=C["btn_stop_h"],
+            text_color="#FFFFFF",
+            height=38, corner_radius=R, width=120,
+            state="disabled",
+            command=self._stop_execution,
+        )
+        self.stop_btn.grid(row=0, column=3, padx=6, pady=9)
+
+        # Spacer
+        spacer = ctk.CTkFrame(bottom, fg_color="transparent")
+        spacer.grid(row=0, column=4, sticky="ew")
+
+        # Info
+        ctk.CTkLabel(
+            bottom, text=f"(c) 2026 Bruno Lobo  |  {APP_NAME}  |  github.com/lobaotech",
+            font=ctk.CTkFont(family="Consolas", size=9),
+            text_color=C["text_dim"],
+        ).grid(row=0, column=5, padx=12, sticky="e")
+
+    # ============================================================
+    # LOGGING
+    # ============================================================
+
+    def _log(self, msg, tag=None):
+        ts = datetime.datetime.now().strftime("%H:%M:%S")
+        self.console.configure(state="normal")
+        if tag:
+            self.console._textbox.insert("end", f"[{ts}] {msg}\n", tag)
+        else:
+            self.console._textbox.insert("end", f"[{ts}] {msg}\n")
+        self.console._textbox.see("end")
+        self.console.configure(state="disabled")
+
+    def _log_ok(self, msg):
+        self._log(f"[OK] {msg}", "ok")
+
+    def _log_warn(self, msg):
+        self._log(f"[WARN] {msg}", "warn")
+
+    def _log_err(self, msg):
+        self._log(f"[ERRO] {msg}", "err")
+
+    def _log_output(self, msg):
+        self._log(f"  | {msg}", "output")
+
+    # ============================================================
+    # DOWNLOAD & EXECUCAO
+    # ============================================================
+
     def _download_script(self, module_path, script_file):
-        """Baixa um script e salva em cache local. Retorna o caminho local."""
+        """Baixa um script e salva em cache local."""
         cache_dir = os.path.join(tempfile.gettempdir(), "lobo_cache")
         os.makedirs(cache_dir, exist_ok=True)
         temp_file = os.path.join(cache_dir, f"{module_path.replace('/', '_')}_{script_file}")
 
-        # Se ja existe em cache, reutilizar
         if os.path.exists(temp_file) and os.path.getsize(temp_file) > 0:
             return temp_file
 
@@ -679,8 +733,8 @@ class LoboAlphaApp(ctk.CTk):
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
-            req = urllib.request.Request(url, headers={"User-Agent": "LoboAlpha/2.0"})
-            with urllib.request.urlopen(req, context=ctx, timeout=15) as resp:
+            req = urllib.request.Request(url, headers={"User-Agent": "LoboAlpha/3.1"})
+            with urllib.request.urlopen(req, context=ctx, timeout=10) as resp:
                 content = resp.read()
             with open(temp_file, "wb") as f:
                 f.write(content)
@@ -689,16 +743,18 @@ class LoboAlphaApp(ctk.CTk):
             return None
 
     def _batch_download(self, scripts_list):
-        """Baixa todos os scripts em paralelo (ate 8 ao mesmo tempo)."""
+        """Baixa todos os scripts em paralelo (ate 10 ao mesmo tempo)."""
         self._log(f"Baixando {len(scripts_list)} scripts em paralelo...")
         results = {}
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
             futures = {}
             for mp, sf in scripts_list:
                 fut = pool.submit(self._download_script, mp, sf)
                 futures[fut] = (mp, sf)
             done_count = 0
             for fut in concurrent.futures.as_completed(futures):
+                if self.cancel_flag:
+                    break
                 mp, sf = futures[fut]
                 path = fut.result()
                 results[(mp, sf)] = path
@@ -706,25 +762,22 @@ class LoboAlphaApp(ctk.CTk):
                 if path:
                     self._log_ok(f"Download: {sf}")
                 else:
-                    self._log_err(f"Falha download: {sf}")
-                # Atualizar progresso do download
-                dl_pct = done_count / len(scripts_list) * 0.3  # 30% para downloads
+                    self._log_err(f"Falha: {sf}")
+                dl_pct = done_count / len(scripts_list) * 0.25
                 self.progress_bar.set(dl_pct)
                 self.progress_pct.configure(text=f"{int(dl_pct*100)}%")
         return results
 
     def _run_script(self, temp_file, script_file):
-        """Executa um script ja baixado com output em tempo real. Timeout de 30s."""
+        """Executa um script com output em tempo real. Timeout 15s."""
         suffix = os.path.splitext(script_file)[1].lower()
 
-        if suffix == ".bat":
+        if suffix in (".bat", ".cmd"):
             cmd = ["cmd.exe", "/c", temp_file]
         elif suffix == ".reg":
             cmd = ["reg.exe", "import", temp_file]
         elif suffix == ".ps1":
             cmd = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", temp_file]
-        elif suffix == ".cmd":
-            cmd = ["cmd.exe", "/c", temp_file]
         else:
             self._log_warn(f"Tipo nao suportado: {suffix}")
             return False
@@ -742,22 +795,28 @@ class LoboAlphaApp(ctk.CTk):
                 bufsize=1,
                 creationflags=creation_flags,
             )
+            self.current_process = process
 
-            # Ler output em tempo real com timeout
             start_time = time.time()
             for line in iter(process.stdout.readline, ""):
+                if self.cancel_flag:
+                    process.kill()
+                    process.stdout.close()
+                    self._log_warn(f"Cancelado: {script_file}")
+                    return False
                 line = line.rstrip()
                 if line:
                     self._log_output(line)
-                # Timeout de 30 segundos por script
-                if time.time() - start_time > 30:
-                    self._log_warn(f"Timeout 30s: {script_file} - avancando...")
+                if time.time() - start_time > 15:
+                    self._log_warn(f"Timeout 15s: {script_file} - avancando...")
                     process.kill()
                     process.stdout.close()
-                    return True  # Continua mesmo com timeout
+                    self.current_process = None
+                    return True
 
             process.stdout.close()
             return_code = process.wait(timeout=5)
+            self.current_process = None
 
             if return_code == 0:
                 self._log_ok(f"{script_file} aplicado!")
@@ -766,15 +825,105 @@ class LoboAlphaApp(ctk.CTk):
             return True
 
         except subprocess.TimeoutExpired:
-            self._log_warn(f"Timeout: {script_file} - avancando...")
+            self._log_warn(f"Timeout: {script_file}")
             try:
                 process.kill()
             except Exception:
                 pass
+            self.current_process = None
             return True
         except Exception as e:
             self._log_err(f"{script_file}: {str(e)[:60]}")
+            self.current_process = None
             return False
+
+    # ============================================================
+    # ACOES
+    # ============================================================
+
+    def _set_running(self, running):
+        self.is_running = running
+        if running:
+            self.cancel_flag = False
+            self.apply_btn.configure(state="disabled", text="  EXECUTANDO...")
+            self.all_btn.configure(state="disabled")
+            self.restore_btn.configure(state="disabled")
+            self.stop_btn.configure(state="normal")
+        else:
+            self.apply_btn.configure(state="normal", text="  Aplicar Selecionados")
+            self.all_btn.configure(state="normal")
+            self.restore_btn.configure(state="normal")
+            self.stop_btn.configure(state="disabled")
+
+    def _stop_execution(self):
+        """Para a execucao imediatamente."""
+        self.cancel_flag = True
+        if self.current_process:
+            try:
+                self.current_process.kill()
+            except Exception:
+                pass
+        self._log_warn("EXECUCAO CANCELADA PELO USUARIO!")
+
+    def _execute_scripts(self, scripts_list):
+        """Worker thread para executar scripts."""
+        start = time.time()
+        total = len(scripts_list)
+
+        # Fase 1: Download paralelo
+        downloaded = self._batch_download(scripts_list)
+        if self.cancel_flag:
+            self._log_warn("Downloads cancelados.")
+            self._set_running(False)
+            return
+
+        dl_ok = sum(1 for v in downloaded.values() if v)
+        self._log(f"Downloads: {dl_ok}/{total} em {time.time()-start:.1f}s")
+        self._log("")
+
+        # Fase 2: Execucao sequencial
+        self._log("Executando scripts...")
+        ok = 0
+        fail = 0
+        for i, (mp, sf) in enumerate(scripts_list):
+            if self.cancel_flag:
+                self._log_warn("Execucao cancelada.")
+                break
+
+            pct = 0.25 + (i / total) * 0.75
+            self.progress_bar.set(pct)
+            self.progress_label.configure(text=f"[{i+1}/{total}] {sf}")
+            self.progress_pct.configure(text=f"{int(pct*100)}%")
+
+            temp_file = downloaded.get((mp, sf))
+            if temp_file and os.path.exists(temp_file):
+                self._log(f"Executando: {sf}")
+                if self._run_script(temp_file, sf):
+                    ok += 1
+                else:
+                    fail += 1
+            else:
+                self._log_err(f"Nao encontrado: {sf}")
+                fail += 1
+
+        elapsed = time.time() - start
+        self.progress_bar.set(1.0)
+        self.progress_label.configure(text="Concluido!")
+        self.progress_pct.configure(text="100%")
+
+        self._log("")
+        self._log("=" * 45)
+        self._log(f"RESULTADO: {ok} OK | {fail} FALHAS | {total} TOTAL")
+        self._log(f"Tempo total: {elapsed:.1f} segundos")
+        if self.cancel_flag:
+            self._log_warn("Execucao foi interrompida pelo usuario.")
+        elif fail == 0:
+            self._log_ok("Todas as otimizacoes aplicadas!")
+        else:
+            self._log_warn(f"{fail} script(s) falharam.")
+        self._log("=" * 45)
+
+        self._set_running(False)
 
     def _apply_tweaks(self):
         if self.is_running:
@@ -786,68 +935,27 @@ class LoboAlphaApp(ctk.CTk):
             self._log_warn("Nenhum script selecionado!")
             return
 
-        total = len(selected)
-        self._log(f"Iniciando execucao de {total} script(s)...")
-        self.is_running = True
-        self.apply_btn.configure(state="disabled", text="\u23f3  EXECUTANDO...")
+        self._log(f"Iniciando {len(selected)} script(s) selecionados...")
+        self._set_running(True)
         self.progress_bar.set(0)
-        self.progress_label.configure(text="Baixando scripts...")
+        self.progress_label.configure(text="Preparando...")
         self.progress_pct.configure(text="0%")
 
-        def worker():
-            start = time.time()
-
-            # FASE 1: Download em lote paralelo (30% da barra)
-            downloaded = self._batch_download(selected)
-            dl_ok = sum(1 for v in downloaded.values() if v)
-            self._log(f"Downloads: {dl_ok}/{total} concluidos em {time.time()-start:.1f}s")
-            self._log("")
-
-            # FASE 2: Execucao sequencial rapida (70% da barra)
-            self._log("Executando scripts...")
-            ok = 0
-            fail = 0
-            for i, (mp, sf) in enumerate(selected):
-                pct = 0.3 + (i / total) * 0.7  # 30% a 100%
-                self.progress_bar.set(pct)
-                self.progress_label.configure(text=f"[{i+1}/{total}] {sf}")
-                self.progress_pct.configure(text=f"{int(pct*100)}%")
-
-                temp_file = downloaded.get((mp, sf))
-                if temp_file and os.path.exists(temp_file):
-                    self._log(f"Executando: {sf}")
-                    if self._run_script(temp_file, sf):
-                        ok += 1
-                    else:
-                        fail += 1
-                else:
-                    self._log_err(f"Nao encontrado: {sf}")
-                    fail += 1
-
-            elapsed = time.time() - start
-            self.progress_bar.set(1.0)
-            self.progress_label.configure(text="\u2705  Concluido!")
-            self.progress_pct.configure(text="100%")
-
-            self._log("")
-            self._log("=" * 55)
-            self._log(f"RESULTADO: {ok} OK | {fail} FALHAS | {total} TOTAL")
-            self._log(f"Tempo total: {elapsed:.1f} segundos")
-            if fail == 0:
-                self._log_ok("Todas as otimizacoes aplicadas com sucesso!")
-            else:
-                self._log_warn(f"{fail} script(s) falharam.")
-            self._log("=" * 55)
-
-            self.is_running = False
-            self.apply_btn.configure(state="normal", text="\u25b6  APLICAR TWEAKS")
-
-        threading.Thread(target=worker, daemon=True).start()
+        threading.Thread(target=self._execute_scripts, args=(selected,), daemon=True).start()
 
     def _apply_all(self):
-        for mn in self.checkboxes:
-            self._select_all(mn, True)
-        self._apply_tweaks()
+        if self.is_running:
+            self._log_warn("Ja existe uma execucao em andamento!")
+            return
+
+        all_scripts = self._get_all_scripts()
+        self._log(f"APLICAR TUDO: {len(all_scripts)} scripts de todas as categorias...")
+        self._set_running(True)
+        self.progress_bar.set(0)
+        self.progress_label.configure(text="Preparando...")
+        self.progress_pct.configure(text="0%")
+
+        threading.Thread(target=self._execute_scripts, args=(all_scripts,), daemon=True).start()
 
     def _create_restore_point(self):
         if self.is_running:
@@ -855,15 +963,13 @@ class LoboAlphaApp(ctk.CTk):
             return
 
         self._log("Criando ponto de restauracao...")
-        self.is_running = True
-        self.progress_bar.set(0)
-        self.progress_label.configure(text="\U0001f6e1\ufe0f  Criando restore point...")
-        self.progress_pct.configure(text="...")
+        self._set_running(True)
+        self.progress_bar.set(0.2)
+        self.progress_label.configure(text="Criando restore point...")
 
         def worker():
-            self.progress_bar.set(0.2)
             temp_file = self._download_script("01_Preparacao_e_Backup", "01_CRIAR_PONTO_RESTAURACAO.bat")
-            self.progress_bar.set(0.4)
+            self.progress_bar.set(0.5)
 
             if temp_file:
                 self._log("Executando restore point...")
@@ -876,12 +982,12 @@ class LoboAlphaApp(ctk.CTk):
 
             if ok:
                 self._log_ok("Ponto de restauracao criado!")
-                self.progress_label.configure(text="\u2705  Restore point criado!")
+                self.progress_label.configure(text="Restore point criado!")
             else:
                 self._log_err("Falha ao criar ponto de restauracao.")
-                self.progress_label.configure(text="\u274c  Falha!")
+                self.progress_label.configure(text="Falha!")
 
-            self.is_running = False
+            self._set_running(False)
 
         threading.Thread(target=worker, daemon=True).start()
 
@@ -891,13 +997,8 @@ class LoboAlphaApp(ctk.CTk):
 # ================================================================
 
 def main():
-    if sys.platform == "win32" and not is_admin():
-        run_as_admin()
-        return
-
     ctk.set_appearance_mode("dark")
-    ctk.set_default_color_theme("blue")
-
+    ctk.set_default_color_theme("dark-blue")
     app = LoboAlphaApp()
     app.mainloop()
 
